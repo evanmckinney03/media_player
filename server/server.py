@@ -60,7 +60,7 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
         #try to run the file in the given url
         try:
             with open(path, 'r') as file:
-                exec(file.read())
+                exec(file.read(), globals(), locals())
             #send back success
             self.send_response(201)
             self.send_header('Location', locals()['location'])
