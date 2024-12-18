@@ -40,6 +40,17 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
         else:
             # Handle requests without the Range header normally
             super().do_GET()
+    def do_POST(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        
+        print(self.path)
+        #with open(self.path[1:], 'r') as file:
+        #    exec(file.read())
+
+        message = 'Hello, World! This is a POST response'
+        self.wfile.write(bytes(message, 'utf8'))
 
 if __name__ == '__main__':
     server_address = ('', 8000)
