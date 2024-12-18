@@ -63,11 +63,11 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
                 exec(file.read())
             #send back success
             self.send_response(201)
-            self.send_header('Location', locals()['wrote_to'])
+            self.send_header('Location', locals()['location'])
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             #also send back the json file it wrote to
-            with open(locals()['wrote_to'], 'r') as file:
+            with open(locals()['location'], 'r') as file:
                 self.wfile.write(bytes(file.read(), 'utf8'))
         except FileNotFoundError:
             #send back an error
