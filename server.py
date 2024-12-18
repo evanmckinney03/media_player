@@ -50,12 +50,13 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
         #    exec(file.read())
         
         #first need to look at the self.path
-        #remove the leading /, and split into path and query
+        #remove the leading /, and split off and ignore query
         split = self.path.split('?')
         path = split[0][1:]
-        if(len(split) > 1):
-            query = split[1]
-
+        
+        #use the body instead of query for the client to send info to server
+        content_len = int(self.headers.get('Content-Length'))
+        body = self.rfile.read(content_len).decode('utf-8')
         #try to run the file in the given url
         try:
             with open(path, 'r') as file:
