@@ -41,17 +41,38 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
             # Handle requests without the Range header normally
             super().do_GET()
     def do_POST(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
+        #self.send_response(200)
+        #self.send_header('Location', 'test');
+        #self.end_headers();
         
-        print(self.path)
+        #print(self.path)
         #with open(self.path[1:], 'r') as file:
         #    exec(file.read())
+        
+        #first need to look at the self.path
+        #remove the leading /, and split into path and query
+        split = self.path.split('?')
+        path = split[0][1:]
+        if(len(split) > 1):
+            query = split[1]
 
-        message = 'Hello, World! This is a POST response'
-        self.wfile.write(bytes(message, 'utf8'))
-
+        #try to run the file in the given url
+        try:
+            with open(path, 'r') as file:
+                exec(file.read())
+            #send back success
+            self.send_response(201)
+            self.send_header('Location', locals()['wrote_to'])
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            #also send back the json file it wrote to
+            with open(locals()['wrote_to'], 'r') as file:
+                self.wfile.write(bytes(file.read(), 'utf8'))
+        except FileNotFoundError:
+            #send back an error
+            self.send_response(404)
+            self.send_header('Location', path)
+            self.end_headers()
 if __name__ == '__main__':
     server_address = ('', 8000)
     httpd = http.server.HTTPServer(server_address, PartialContentHandler)

@@ -11,3 +11,5 @@ except FileNotFoundError:
             "hello": "world"
         }
         json.dump(data, file)
+
+wrote_to = 'data.json'
