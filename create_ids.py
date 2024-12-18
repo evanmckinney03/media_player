@@ -1,7 +1,10 @@
+global json
 import json
-import os
+global haslib
 import hashlib
+global time
 import time
+global random
 import random
 
 def generate_id():
@@ -24,8 +27,8 @@ except:
     #if the file does not exist, then current_ids should be empty
     pass
 
-#get all the files currently in ../videos
-files = os.listdir('../videos')
+#get all the files currently in videos
+files = os.listdir('videos')
 
 #remove from files ids that are in current_ids
 ids_set = set(current_ids.keys())
@@ -37,7 +40,7 @@ for f in files:
     #add the file extenstion as well
     current_ids[new_name] = f
     #also rename the file in ../videos
-    os.rename('../videos/' + f, '../videos/' + new_name)
+    os.rename('videos/' + f, 'videos/' + new_name)
 
 #now current_ids contains all the unique id to old file names
 with open(location, 'w+') as file:
