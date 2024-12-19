@@ -7,12 +7,12 @@ function init() {
 
 async function displayFirst(){
   const ids = await getData('json/ids.json', 'GET');
-  displayVideo(ids[0]['id']);
+  displayVideo(Object.keys(ids)[0]);
 }
 
-async function getData(url, method) {
+async function getData(url, method, body) {
   try {
-    const response = await fetch(url, {method: method});
+    const response = await fetch(url, {method: method, body: JSON.stringify(body)})
     if(!response.ok) {
       throw new Error(`Response status: ${response.status}`);
     }

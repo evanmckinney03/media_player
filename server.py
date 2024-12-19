@@ -59,7 +59,7 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
         body = self.rfile.read(content_len).decode('utf-8')
         #try to run the file in the given url
         try:
-            exec_loc = {}
+            exec_loc = {'body': body}
             with open(path, 'r') as file:
                 exec(file.read(), globals(), exec_loc)
             #send back success
