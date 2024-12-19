@@ -1,5 +1,6 @@
 import http.server
 import os
+import json
 
 class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -41,14 +42,6 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
             # Handle requests without the Range header normally
             super().do_GET()
     def do_POST(self):
-        #self.send_response(200)
-        #self.send_header('Location', 'test');
-        #self.end_headers();
-        
-        #print(self.path)
-        #with open(self.path[1:], 'r') as file:
-        #    exec(file.read())
-        
         #first need to look at the self.path
         #remove the leading /, and split off and ignore query
         split = self.path.split('?')
@@ -57,6 +50,16 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
         #use the body instead of query for the client to send info to server
         content_len = int(self.headers.get('Content-Length'))
         body = self.rfile.read(content_len).decode('utf-8')
+        if(len(body) > 0):
+            try:
+                body = json.loads(body)
+            except json.JSONDecodeError:
+                #expected a json body
+                self.send_response(400)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                message = 'Expected a JSON body'
+                self.wfile.write(bytes(message, 'utf8'))
         #try to run the file in the given url
         try:
             exec_loc = {'body': body}

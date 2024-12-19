@@ -40,7 +40,7 @@ if(len(current_ids) > 0):
 for f in files:
     new_name = generate_id() + '.' + f.split('.')[-1]
     #add the file extenstion as well
-    current_ids[new_name] = {'title': f};
+    current_ids[new_name] = {'title': f, 'tags': []};
     #also rename the file in ../videos
     os.rename('videos/' + f, 'videos/' + new_name)
 
@@ -48,6 +48,4 @@ for f in files:
 with open(location, 'w+') as file:
     file.seek(0)
     json.dump(current_ids, file)
-    file.close()
 
-#rename the file in ../videos to the unique id
