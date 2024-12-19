@@ -62,7 +62,6 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
             exec_loc = {}
             with open(path, 'r') as file:
                 exec(file.read(), globals(), exec_loc)
-                print(globals())
             #send back success
             self.send_response(201)
             self.send_header('Location', exec_loc['location'])

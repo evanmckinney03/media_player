@@ -7,7 +7,7 @@ function init() {
 
 async function displayFirst(){
   const ids = await getData('json/ids.json', 'GET');
-  displayVideo(Object.keys(ids)[0]);
+  displayVideo(ids[0]['id']);
 }
 
 async function getData(url, method) {
