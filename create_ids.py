@@ -49,3 +49,5 @@ with open(location, 'w+') as file:
     file.seek(0)
     json.dump(current_ids, file)
 
+success = True
+message = 'hello'
