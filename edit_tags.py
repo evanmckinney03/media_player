@@ -1,6 +1,13 @@
 global json
 import json
 
+def addTag(tags, tag, body):
+    try:
+        tags[tag]['ids'].append(body['id'])
+        tags[tag]['ids'] = list(set(tags[tag]['ids']))
+    except KeyError:
+        #there are no previous ids attached to this tag
+        tags[tag] = {'ids': [body['id']]}
 #assume body is id: [tags]
 location = 'json/ids.json'
 
@@ -11,7 +18,11 @@ try:
         #set ids to be the stuff in ids.json
         ids = json.loads(file.read())
     #ids now has ids.json
-    ids[body['id']]['tags'] = list(set(ids[body['id']]['tags'] + body['tags']))
+    if(isinstance(body['tags'], str)):
+        ids[body['id']]['tags'].append(body['tags'])
+        ids[body['id']]['tags'] = list(set(ids[body['id']]['tags']))
+    else:
+        ids[body['id']]['tags'] = list(set(ids[body['id']]['tags'] + body['tags']))
     #write ids to ids.json
     with open(location, 'w+') as file:
         file.seek(0)
@@ -26,14 +37,11 @@ try:
         pass
     #tags now has all the current tags in tags.json
     #add to the tags the id that it was just tied to
-    for tag in body['tags']:
-        try:
-            tags[tag]['ids'].append(body['id'])
-            tags[tag]['ids'] = list(set(tags[tag]['ids']))
-        except KeyError:
-            print('key error')
-            #there are no previous ids attached to this tag
-            tags[tag] = {'ids': [body['id']]}
+    if(isinstance(body['tags'], str)):
+        addTag(tags, body['tags'], body)
+    else:
+        for tag in body['tags']:
+            addTag(tags, tag, body)
     #add tags to tags.json
     with open('json/tags.json', 'w+') as file:
         file.seek(0)
@@ -45,8 +53,5 @@ except FileNotFoundError:
     message = 'No Ids Exist'
 except KeyError:
     success = False
-    message = 'Malformed body. Body must be in form {id: "<id>", tags:[<tags>]}'
-except TypeError:
-    success = False
-    message = 'A body must be attached'
+    message = 'Malformed body. Body must be in form {id: "<id>", tags:<tags>}'
 

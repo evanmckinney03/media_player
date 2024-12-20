@@ -48,18 +48,17 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
         path = split[0][1:]
         query = '';
         if(len(split) > 1):
-            query = split[1]
-        
-        #use the body instead of query for the client to send info to server
+            query = split[1] 
+
+        #use the body that the client sent
         content_len = int(self.headers.get('Content-Length'))
         body = self.rfile.read(content_len).decode('utf-8')
-        if(len(body) > 0):
-            try:
-                body = json.loads(body)
-            except json.JSONDecodeError:
-                #just make body blank, and then if it is needed later, error will be caught there
-                #makes it so that a malformed body won't err when body isn't needed
-                body = {};
+        try:
+            body = json.loads(body)
+        except json.JSONDecodeError:
+            #just make body blank, and then if it is needed later, error will be caught there
+            #makes it so that a malformed body won't err when body isn't needed
+            body = {};
         #try to run the file in the given url
         try:
             exec_loc = {'body': body, 'query': query}
