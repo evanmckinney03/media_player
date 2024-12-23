@@ -1,5 +1,6 @@
 import http.server
 import os
+import json
 
 class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -41,35 +42,43 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
             # Handle requests without the Range header normally
             super().do_GET()
     def do_POST(self):
-        #self.send_response(200)
-        #self.send_header('Location', 'test');
-        #self.end_headers();
-        
-        #print(self.path)
-        #with open(self.path[1:], 'r') as file:
-        #    exec(file.read())
-        
         #first need to look at the self.path
-        #remove the leading /, and split off and ignore query
+        #remove the leading /, and split off query
         split = self.path.split('?')
         path = split[0][1:]
-        
-        #use the body instead of query for the client to send info to server
+        query = '';
+        if(len(split) > 1):
+            query = split[1] 
+
+        #use the body that the client sent
         content_len = int(self.headers.get('Content-Length'))
         body = self.rfile.read(content_len).decode('utf-8')
+        try:
+            body = json.loads(body)
+        except json.JSONDecodeError:
+            #just make body blank, and then if it is needed later, error will be caught there
+            #makes it so that a malformed body won't err when body isn't needed
+            body = {};
         #try to run the file in the given url
         try:
-            exec_loc = {}
+            exec_loc = {'body': body, 'query': query}
             with open(path, 'r') as file:
                 exec(file.read(), globals(), exec_loc)
-            #send back success
-            self.send_response(201)
-            self.send_header('Location', exec_loc['location'])
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            #also send back the json file it wrote to
-            with open(exec_loc['location'], 'r') as file:
-                self.wfile.write(bytes(file.read(), 'utf8'))
+            #the given script will create locals 'location' and 'success' and 'message'
+            if(exec_loc['success']):
+                self.send_response(201)
+                self.send_header('Location', exec_loc['location'])
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                #also send back the json file it wrote to
+                with open(exec_loc['location'], 'r') as file:
+                    self.wfile.write(bytes(file.read(), 'utf8'))
+            else:
+                self.send_response(400)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+
+                self.wfile.write(bytes(exec_loc['message'], 'utf8'))
         except FileNotFoundError:
             #send back an error
             self.send_response(404)

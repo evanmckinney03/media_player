@@ -18,7 +18,7 @@ def generate_id():
 #location that the json file is at
 location = 'json/ids.json'
 
-current_ids = []
+current_ids = {}
 #try to open json/ids.json
 try:
     with open(location, 'r+') as file:
@@ -33,14 +33,14 @@ files = os.listdir('videos')
 
 #remove from files ids that are in current_ids
 if(len(current_ids) > 0):
-  ids_set = set([x['id'] for x in current_ids])
+  ids_set = set(current_ids.keys())
   files[:] = [x for x in files if x not in ids_set]
 
 #now files contains the list of videos that needs a unique id
 for f in files:
     new_name = generate_id() + '.' + f.split('.')[-1]
     #add the file extenstion as well
-    current_ids.append({'id': new_name, 'title': f});
+    current_ids[new_name] = {'title': f, 'tags': []};
     #also rename the file in ../videos
     os.rename('videos/' + f, 'videos/' + new_name)
 
@@ -48,6 +48,6 @@ for f in files:
 with open(location, 'w+') as file:
     file.seek(0)
     json.dump(current_ids, file)
-    file.close()
 
-#rename the file in ../videos to the unique id
+success = True
+message = 'hello'
