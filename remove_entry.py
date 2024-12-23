@@ -7,6 +7,8 @@ location = 'json/ids.json'
 #determine if body has passed in tag/s or id/s or both to remove 
 try:
     ids_to_remove = body['ids']
+    if isinstance(ids_to_remove, str):
+        ids_to_remove = [ids_to_remove]
     id_file = open('json/ids.json', 'r+')
     current_ids = json.load(id_file)
     #try to open tags.json
@@ -56,6 +58,8 @@ except (FileNotFoundError, json.JSONDecodeError):
 
 try:
     tags_to_remove = body['tags']
+    if isinstance(tags_to_remove, str):
+        tags_to_remove = [tags_to_remove]
     #open both ids and tags.json
     id_file = open('json/ids.json', 'r+')
     tag_file = open('json/tags.json', 'r+')
