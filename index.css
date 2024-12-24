@@ -1,0 +1,20 @@
+
+.flex-grid {
+  display: flex;
+}
+
+.col {
+  flex: 1;
+}
+
+#thumbnails {
+  width: 1280px;
+}
+
+.thumbnail {
+  max-width: 100%;
+}
+
+.thumbnail-text {
+  margin: 0px;
+}

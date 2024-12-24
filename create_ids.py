@@ -40,7 +40,7 @@ if(len(current_ids) > 0):
 for f in files:
     new_name = generate_id() + '.' + f.split('.')[-1]
     #add the file extenstion as well
-    current_ids[new_name] = {'title': f, 'tags': []};
+    current_ids[new_name] = {'title': f.split('.')[:-1], 'tags': []};
     #also rename the file in ../videos
     os.rename('videos/' + f, 'videos/' + new_name)
 
