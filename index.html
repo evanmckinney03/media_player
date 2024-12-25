@@ -5,10 +5,15 @@
   <link rel="stylesheet" href="index.css">
 </head>
 <body>
-  <div id="main">
-    <video controls id="video"></video>
+  <div id="main-div">
+    <div id="video-div" class="flex-grid">
+      <video controls id="video"></video>
+      <div id="about-div">
+        <h1 id="title"></h1>
+      </div>
+    </div>
     <script src="index.js"></script>
-    <div id="thumbnails" class="flex-grid">
+    <div id="thumbnails-div" class="flex-grid">
       <div id="col0" class="col"></div>
       <div id="col1" class="col"></div>
       <div id="col2" class="col"></div>

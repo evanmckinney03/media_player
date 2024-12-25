@@ -16,7 +16,7 @@ async function displayFirstAndThumbnails(){
     await getData('create_thumbnails.py', 'POST');
   }
   const ids = Object.keys(json);
-  displayVideo(ids[0]);
+  displayVideo(ids[0], json[ids[0]]['title']);
   for(let i = 0; i < ids.length; i++) {
     await createThumbnail(ids[i], i % 3, json[ids[i]]['title']);
   }
@@ -32,7 +32,7 @@ async function createThumbnail(id, col, title) {
   img.setAttribute('class', 'thumbnail');
   img.addEventListener('click', function() {
     const id = this.getAttribute('src').split('/')[1].split('.')[0];
-    displayVideo(id + '.mp4');
+    displayVideo(id + '.mp4', title);
   });
   const div = document.createElement('div');
   div.appendChild(text);
@@ -53,7 +53,7 @@ async function getData(url, method, body) {
 
 
 //given the id, put it into the video player
-function displayVideo(id) {
+function displayVideo(id, title) {
   const video = document.getElementById('video');
   let src = document.getElementById('src');
   const url = 'videos/' + id;
@@ -62,10 +62,11 @@ function displayVideo(id) {
     src.setAttribute('id', 'src');
     src.setAttribute('type', 'video/mp4');
     video.appendChild(src);
+  } 
+  if(src.getAttribute('src') !== url) {
     src.setAttribute('src', 'videos/' + id);
-    video.load();
-  } else if(src.getAttribute('src') !== url) {
-    src.setAttribute('src', 'videos/' + id);
+    const titleElem = document.getElementById('title');
+    titleElem.innerHTML = title; 
     video.load();
   }
 }
