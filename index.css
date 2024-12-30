@@ -33,3 +33,7 @@
 #title {
   margin: 0px;
 }
+
+.removed {
+  display: none;
+}

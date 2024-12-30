@@ -1,28 +1,12 @@
 window.onload = init()
 
 let ids_obj;
+let tags_obj;
 
 function init() {
-  displayFirstAndThumbnails()
-}
-
-async function displayFirstAndThumbnails(){
-  try {
-    const json = await getData('json/ids.json', 'GET');
-    ids_obj = json;
-  } catch {
-    //error getting ids.json, meaning it does not exist
-    await getData('create_ids.py', 'POST');
-    json = await getData('json/ids.json', 'GET');
-    //also generate thumbnails for the videos
-    await getData('create_thumbnails.py', 'POST');
-    ids_obj = json;
-  }
-  const ids = Object.keys(ids_obj);
-  displayVideo(ids[0], ids_obj[ids[0]]['title']);
-  for(let i = 0; i < ids.length; i++) {
-    await createThumbnail(ids[i], i % 3, ids_obj[ids[i]]['title']);
-  }
+  displayFirstAndThumbnails();
+  //get tags from server
+  getTags();
   //add an event listener to the edit button to make the title editable
   const editTitleButton = document.getElementById('edit-title-button');
   editTitleButton.addEventListener('click', function() {
@@ -38,6 +22,42 @@ async function displayFirstAndThumbnails(){
       editTitle.call(this);
     }
   });
+  const addTagButton = document.getElementById('add-tag-button');
+  addTagButton.addEventListener('click', addTagClicked);
+
+  const doneTagsButton = document.getElementById('tag-done-button');
+  doneTagsButton.addEventListener('click', doneTagsClicked);
+
+  const tagInput = document.getElementById('tag-input');
+  tagInput.addEventListener('keypress', function(event) {
+    if(event.key == 'Enter') {
+      addTags(this.value);
+      this.value = '';
+    }
+  });
+}
+
+async function editTitle() {
+  this.setAttribute('readonly', '');
+  const newTitle = this.value;
+}
+
+async function displayFirstAndThumbnails(){
+  try {
+    const json = await getData('json/ids.json', 'GET');
+    ids_obj = json;
+  } catch {
+    //error getting ids.json, meaning it does not exist
+    const json = await getData('create_ids.py', 'POST');
+    //also generate thumbnails for the videos
+    await getData('create_thumbnails.py', 'POST');
+    ids_obj = json;
+  }
+  const ids = Object.keys(ids_obj);
+  displayVideo(ids[0], ids_obj[ids[0]]['title']);
+  for(let i = 0; i < ids.length; i++) {
+    await createThumbnail(ids[i], i % 3, ids_obj[ids[i]]['title']);
+  }
 }
 
 async function editTitle() {
@@ -84,6 +104,32 @@ async function getData(url, method, body) {
   return json;
 }
 
+//get the tags from the server
+async function getTags() {
+  try {
+    tags_obj = await getData('json/tags.json', 'GET');
+  } catch {
+    tags_obj = {};
+  }
+}
+
+const tagsToSend = [];
+//add tags to a list, dont send it to server yet
+function addTags(tag) {
+  tagsToSend.push(tag);
+}
+
+//send taglist to server
+async function sendTags() {
+  const id = document.getElementById('src').getAttribute('src').split('/')[1];
+  try {
+    ids_obj = await getData('edit_tags.py', 'POST', {id: id, tags: tagsToSend});
+    tags_obj = getTags();
+  } catch {
+    console.error('Unable to send tags to server');
+  }
+}
+
 
 //given the id, put it into the video player
 function displayVideo(id, title) {
@@ -96,11 +142,25 @@ function displayVideo(id, title) {
     src.setAttribute('type', 'video/mp4');
     video.appendChild(src);
   } 
-  if(src.getAttribute('src') !== url) {
-    src.setAttribute('src', 'videos/' + id);
-    const titleElem = document.getElementById('title');
-    titleElem.value = title;
-    titleElem.setAttribute('readonly', '');
-    video.load();
+  src.setAttribute('src', 'videos/' + id);
+  const titleElem = document.getElementById('title');
+  titleElem.value = title;
+  titleElem.setAttribute('readonly', '');
+  video.load();
+
+  //also must display tags
+}
+
+function addTagClicked() {
+  //add to the tag menu
+  const div = document.getElementById('tag-menu-div');
+  div.classList.remove('removed');  
+}
+
+function doneTagsClicked() {
+  this.parentNode.classList.add('removed');
+  if(this.value !== '') {
+    addTag(this.value);
   }
+  sendTags();
 }
