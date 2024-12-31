@@ -1,0 +1,44 @@
+
+.flex-grid {
+  display: flex;
+}
+
+.col {
+  flex: 1;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+#thumbnails-div {
+  width: 100%;
+  background-color: yellow;
+}
+
+#about-div {
+  background-color: lightBlue;
+  width: 30%;
+  height: stretch;
+}
+
+.thumbnail {
+  max-width: 100%;
+}
+
+#video {
+  max-width: 70%;
+}
+
+.thumbnail-text {
+  margin: 0px;
+}
+
+#title {
+  margin: 0px;
+}
+
+.removed {
+  display: none;
+}
