@@ -115,26 +115,6 @@ async function getTags() {
   }
 }
 
-const tagsToSend = [];
-//add tags to a list, dont send it to server yet
-//also displayTags
-function addTag(tag) {
-  tagsToSend.push(tag);
-  displayTags(tag);
-}
-
-//send taglist to server
-async function sendTags() {
-  const id = document.getElementById('src').getAttribute('src').split('/')[1];
-  try {
-    ids_obj = await getData('add_tags.py', 'POST', {id: id, tags: tagsToSend});
-    tags_obj = getTags();
-  } catch {
-    console.error('Unable to send tags to server');
-  }
-}
-
-
 //given the id, put it into the video player
 function displayVideo(id, title) {
   const video = document.getElementById('video');
@@ -164,7 +144,7 @@ function editTagClicked() {
 
 function doneTagsClicked() {
   this.parentNode.classList.add('removed');
-  if(tagsToSend.length != 0) {
+  if(tagsToSend.length != 0 || tagsToRemove.length != 0) {
     sendTags();
   }
 }
@@ -173,7 +153,6 @@ function doneTagsClicked() {
 //if tag is passed in, will append tag to previously displayed tags
 //otherwise, will update based on ids_obj
 function displayTags(tag) {
-  console.log(tag)
   let tagList = [];
   const length = 'Tags:<br>'.length;
   if(tag === undefined) {
@@ -192,6 +171,15 @@ function displayTags(tag) {
   }
 }
 
+const tagsToSend = [];
+//add tags to a list, dont send it to server yet
+//also displayTags
+function addTag(tag) {
+  tagsToSend.push(tag);
+  displayTags(tag);
+}
+
+const tagsToRemove = [];
 function tagClicked() {
   //for now, check if tag menu is removed, if so then don't do anything
   //ideally, when edit tag is clicked, x's will appear next to the tag
@@ -201,6 +189,33 @@ function tagClicked() {
     const id = document.getElementById('src').getAttribute('src').split('/')[1];
     const tagDiv = document.getElementById('tag-list');
     tagDiv.removeChild(this);
-    //make call to remove this from tags
+    //add tag to tags to remove
+    //start from 4 because first three letters are 'tag,'
+    const tag = this.getAttribute('id').slice(4);
+    tagsToRemove.push(tag);
+  }
+}
+
+//send taglist to server
+async function sendTags() {
+  const id = document.getElementById('src').getAttribute('src').split('/')[1];
+  try {
+    //if a tag is being removed, dont also send it
+    const diff1 = tagsToSend.filter(x => !tagsToRemove.includes(x));
+    if(diff1.length > 0) {
+      ids_obj = await getData('add_tags.py', 'POST', {id: id, tags: diff1});
+      tags_obj = getTags();
+    }
+    //if a tag was added then removed, dont need to remove it still
+    const diff2 = tagsToRemove.filter(x => !tagsToSend.includes(x));
+    console.log(tagsToRemove)
+    console.log(tagsToSend)
+    console.log(diff2)
+    if(diff2.length > 0) {
+      ids_obj = await getData('remove_tags.py', 'POST', {id: id, tags: diff2});
+      tags_obj = getTags();
+    }
+  } catch {
+    console.error('Unable to send tags to server');
   }
 }
