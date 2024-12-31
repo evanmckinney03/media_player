@@ -175,8 +175,18 @@ const tagsToSend = [];
 //add tags to a list, dont send it to server yet
 //also displayTags
 function addTag(tag) {
-  tagsToSend.push(tag);
-  displayTags(tag);
+  //do not add duplicates
+  const id = document.getElementById('src').getAttribute('src').split('/')[1];
+  if(!ids_obj[id]['tags'].includes(tag) && !tagsToSend.includes(tag)) {
+    tagsToSend.push(tag);
+    displayTags(tag);
+  } else {
+    const index = tagsToRemove.indexOf(tag);
+    if(index != -1) {
+      tagsToRemove.splice(index, 1);
+      displayTags(tag);
+    }
+  }
 }
 
 const tagsToRemove = [];
@@ -208,9 +218,6 @@ async function sendTags() {
     }
     //if a tag was added then removed, dont need to remove it still
     const diff2 = tagsToRemove.filter(x => !tagsToSend.includes(x));
-    console.log(tagsToRemove)
-    console.log(tagsToSend)
-    console.log(diff2)
     if(diff2.length > 0) {
       ids_obj = await getData('remove_tags.py', 'POST', {id: id, tags: diff2});
       tags_obj = getTags();
