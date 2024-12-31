@@ -22,17 +22,19 @@ function init() {
       editTitle.call(this);
     }
   });
-  const addTagButton = document.getElementById('add-tag-button');
-  addTagButton.addEventListener('click', addTagClicked);
+  const editTagButton = document.getElementById('edit-tag-button');
+  editTagButton.addEventListener('click', editTagClicked);
 
   const doneTagsButton = document.getElementById('tag-done-button');
   doneTagsButton.addEventListener('click', doneTagsClicked);
 
-  const tagInput = document.getElementById('tag-input');
-  tagInput.addEventListener('keypress', function(event) {
+  const tagInputField = document.getElementById('tag-input');
+  tagInputField.addEventListener('keypress', function(event) {
     if(event.key == 'Enter') {
-      addTags(this.value);
-      this.value = '';
+      if(this.value !== '') {
+        addTag(this.value);
+        this.value = '';
+      }
     }
   });
 }
@@ -115,15 +117,17 @@ async function getTags() {
 
 const tagsToSend = [];
 //add tags to a list, dont send it to server yet
-function addTags(tag) {
+//also displayTags
+function addTag(tag) {
   tagsToSend.push(tag);
+  displayTags(tag);
 }
 
 //send taglist to server
 async function sendTags() {
   const id = document.getElementById('src').getAttribute('src').split('/')[1];
   try {
-    ids_obj = await getData('edit_tags.py', 'POST', {id: id, tags: tagsToSend});
+    ids_obj = await getData('add_tags.py', 'POST', {id: id, tags: tagsToSend});
     tags_obj = getTags();
   } catch {
     console.error('Unable to send tags to server');
@@ -149,9 +153,10 @@ function displayVideo(id, title) {
   video.load();
 
   //also must display tags
+  displayTags();
 }
 
-function addTagClicked() {
+function editTagClicked() {
   //add to the tag menu
   const div = document.getElementById('tag-menu-div');
   div.classList.remove('removed');  
@@ -159,8 +164,43 @@ function addTagClicked() {
 
 function doneTagsClicked() {
   this.parentNode.classList.add('removed');
-  if(this.value !== '') {
-    addTag(this.value);
+  if(tagsToSend.length != 0) {
+    sendTags();
   }
-  sendTags();
+}
+
+//will update tags
+//if tag is passed in, will append tag to previously displayed tags
+//otherwise, will update based on ids_obj
+function displayTags(tag) {
+  console.log(tag)
+  let tagList = [];
+  const length = 'Tags:<br>'.length;
+  if(tag === undefined) {
+    const id = document.getElementById('src').getAttribute('src').split('/')[1];
+    tagList = ids_obj[id]['tags'];
+  } else {
+    tagList.push(tag);
+  }
+  const tagsElem = document.getElementById('tag-list');
+  for(let i = 0; i < tagList.length; i++) {
+    const span = document.createElement('span');
+    span.addEventListener('click', tagClicked);
+    span.setAttribute('id', 'tag,' + tagList[i]);
+    span.innerHTML = tagList[i] + ', ';
+    tagsElem.appendChild(span)
+  }
+}
+
+function tagClicked() {
+  //for now, check if tag menu is removed, if so then don't do anything
+  //ideally, when edit tag is clicked, x's will appear next to the tag
+  //and when clicked this func will run
+  const div = document.getElementById('tag-menu-div');
+  if(!div.classList.contains('removed')) {
+    const id = document.getElementById('src').getAttribute('src').split('/')[1];
+    const tagDiv = document.getElementById('tag-list');
+    tagDiv.removeChild(this);
+    //make call to remove this from tags
+  }
 }
