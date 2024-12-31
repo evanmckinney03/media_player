@@ -132,7 +132,11 @@ function displayVideo(id, title) {
   titleElem.setAttribute('readonly', '');
   video.load();
 
-  //also must display tags
+  //also must display tags, but clear them first
+  const tagList = document.getElementById('tag-list');
+  while(tagList.firstChild) {
+    tagList.removeChild(tagList.lastChild);
+  }
   displayTags();
 }
 
