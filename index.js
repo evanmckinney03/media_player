@@ -58,7 +58,7 @@ async function displayFirstAndThumbnails(){
   const ids = Object.keys(ids_obj);
   displayVideo(ids[0], ids_obj[ids[0]]['title']);
   for(let i = 0; i < ids.length; i++) {
-    await createThumbnail(ids[i], i % 3, ids_obj[ids[i]]['title']);
+    await createThumbnail(ids[i], ids_obj[ids[i]]['title']);
   }
 }
 
@@ -76,23 +76,27 @@ async function editTitle() {
   ids_obj = getData('edit_ids.py', 'POST', {id: id + '.mp4', title: newTitle});
 }
 
-async function createThumbnail(id, col, title) {
+async function createThumbnail(id, title) {
   const plainID = id.split('.')[0];
   const text = document.createElement('p');
   text.innerHTML = title;
   text.setAttribute('class', 'thumbnail-text');
   const img = document.createElement('img');
   img.setAttribute('src', 'thumbnails/' + plainID + '.jpg');
-  img.setAttribute('class', 'thumbnail');
+  img.setAttribute('class', 'thumbnail-img');
   img.addEventListener('click', function() {
     const id = this.getAttribute('src').split('/')[1].split('.')[0];
-    displayVideo(id + '.mp4', title);
+    const currentId = document.getElementById('src').getAttribute('src').split('/')[1].split('.')[0];
+    if(id != currentId) {
+      displayVideo(id + '.mp4', title);
+    }
   });
   const div = document.createElement('div');
   div.appendChild(text);
   div.appendChild(img);
   div.setAttribute('id', plainID);
-  const pdiv = document.getElementById('col' + col);
+  div.setAttribute('class', 'thumbnail');
+  const pdiv = document.getElementById('thumbnails-div');
   pdiv.appendChild(div);
 }
 
