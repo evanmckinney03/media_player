@@ -37,6 +37,11 @@ function init() {
       }
     }
   });
+
+  const searchInput = document.getElementById('search-input');
+  searchInput.addEventListener('input', function(e) {
+    searchTitles(this.value);
+  });
 }
 
 async function editTitle() {
@@ -67,7 +72,7 @@ async function editTitle() {
   const newTitle = this.value;
   //update the thumbnail
   //id is in the video element
-  const id = document.getElementById('src').getAttribute('src').split('/')[1].split('.')[0];
+  const id = getCurrentId();
   const div = document.getElementById(id);
   //works because title is first child, change if that changes in future
   div.firstElementChild.innerHTML = newTitle;
@@ -85,16 +90,17 @@ async function createThumbnail(id, title) {
   img.setAttribute('src', 'thumbnails/' + plainID + '.jpg');
   img.setAttribute('class', 'thumbnail-img');
   img.addEventListener('click', function() {
-    const id = this.getAttribute('src').split('/')[1].split('.')[0];
-    const currentId = document.getElementById('src').getAttribute('src').split('/')[1].split('.')[0];
+    //the parent is the div container whose id is the video name
+    const id = this.parentNode.getAttribute('id');
+    const currentId = getCurrentId();
     if(id != currentId) {
-      displayVideo(id + '.mp4', title);
+      displayVideo(id, title);
     }
   });
   const div = document.createElement('div');
   div.appendChild(text);
   div.appendChild(img);
-  div.setAttribute('id', plainID);
+  div.setAttribute('id', id);
   div.setAttribute('class', 'thumbnail');
   const pdiv = document.getElementById('thumbnails-div');
   pdiv.appendChild(div);
@@ -144,6 +150,12 @@ function displayVideo(id, title) {
   displayTags();
 }
 
+//returns the id of the video currently playing
+//includes file ext
+function getCurrentId() {
+  return document.getElementById('src').getAttribute('src').split('/')[1];
+}
+
 function editTagClicked() {
   //add to the tag menu
   const div = document.getElementById('tag-menu-div');
@@ -164,7 +176,7 @@ function displayTags(tag) {
   let tagList = [];
   const length = 'Tags:<br>'.length;
   if(tag === undefined) {
-    const id = document.getElementById('src').getAttribute('src').split('/')[1];
+    const id = getCurrentId();
     tagList = ids_obj[id]['tags'];
   } else {
     tagList.push(tag);
@@ -184,7 +196,7 @@ const tagsToSend = [];
 //also displayTags
 function addTag(tag) {
   //do not add duplicates
-  const id = document.getElementById('src').getAttribute('src').split('/')[1];
+  const id = getCurrentId();
   if(!ids_obj[id]['tags'].includes(tag) && !tagsToSend.includes(tag)) {
     tagsToSend.push(tag);
     displayTags(tag);
@@ -204,7 +216,7 @@ function tagClicked() {
   //and when clicked this func will run
   const div = document.getElementById('tag-menu-div');
   if(!div.classList.contains('removed')) {
-    const id = document.getElementById('src').getAttribute('src').split('/')[1];
+    const id = getCurrentId();
     const tagDiv = document.getElementById('tag-list');
     tagDiv.removeChild(this);
     //add tag to tags to remove
@@ -216,7 +228,7 @@ function tagClicked() {
 
 //send taglist to server
 async function sendTags() {
-  const id = document.getElementById('src').getAttribute('src').split('/')[1];
+  const id = getCurrentId();
   try {
     //if a tag is being removed, dont also send it
     const diff1 = tagsToSend.filter(x => !tagsToRemove.includes(x));
@@ -232,5 +244,20 @@ async function sendTags() {
     }
   } catch {
     console.error('Unable to send tags to server');
+  }
+}
+
+//search by titles and display the thumbnails
+function searchTitles(value) {
+  console.log(value)
+  //for now, just linear search through the titles
+  const thumbnails = document.getElementById('thumbnails-div').children;
+  for(let i = 0; i < thumbnails.length; i++) {
+    const title = ids_obj[thumbnails[i].getAttribute('id')]['title'];
+    if(title.toLowerCase().startsWith(value.toLowerCase())) {
+      thumbnails[i].classList.remove('removed');
+    } else {
+      thumbnails[i].classList.add('removed');
+    }
   }
 }
