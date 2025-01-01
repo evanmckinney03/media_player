@@ -249,12 +249,11 @@ async function sendTags() {
 
 //search by titles and display the thumbnails
 function searchTitles(value) {
-  console.log(value)
   //for now, just linear search through the titles
   const thumbnails = document.getElementById('thumbnails-div').children;
   for(let i = 0; i < thumbnails.length; i++) {
     const title = ids_obj[thumbnails[i].getAttribute('id')]['title'];
-    if(title.toLowerCase().startsWith(value.toLowerCase())) {
+    if(title.toLowerCase().includes(value.toLowerCase())) {
       thumbnails[i].classList.remove('removed');
     } else {
       thumbnails[i].classList.add('removed');
