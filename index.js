@@ -1,8 +1,9 @@
-window.onload = init()
 
 let ids_obj;
 let tags_obj;
+const elemsToSearch = [];
 
+window.onload = init()
 function init() {
   displayFirstAndThumbnails();
   //get tags from server
@@ -37,10 +38,35 @@ function init() {
       }
     }
   });
+  
+  const searchBy = document.getElementById('search-by');
+  let searchByValue = searchBy.value;
+  searchBy.addEventListener('input', function(e) {
+    searchByValue = this.value;
+    //should probably also search values
+  });
 
   const searchInput = document.getElementById('search-input');
   searchInput.addEventListener('input', function(e) {
-    searchTitles(this.value);
+    if(searchByValue === 'title') {
+      searchTitles(this.value);
+    } else {
+      searchTags(this.value);
+    }
+  });
+
+  const clearSearchButton = document.getElementById('clear-search-button');
+  clearSearchButton.addEventListener('click', function(e) {
+    this.classList.add('removed');
+    clearSearch();
+  });
+
+  searchInput.addEventListener('keypress', function(event) {
+    if(event.key == 'Enter') { 
+      clearSearchButton.classList.remove('removed');
+      addToSearchList(this.value);
+      this.value = '';
+    }
   });
 }
 
@@ -65,6 +91,8 @@ async function displayFirstAndThumbnails(){
   for(let i = 0; i < ids.length; i++) {
     await createThumbnail(ids[i], ids_obj[ids[i]]['title']);
   }
+  //after displaying the thumbnails, set elemsToSearch to all the thumbnails
+  elemsToSearch.push(...document.getElementById('thumbnails-div').children)
 }
 
 async function editTitle() {
@@ -247,16 +275,60 @@ async function sendTags() {
   }
 }
 
+//during init, set this to all the thumbnail divs
 //search by titles and display the thumbnails
 function searchTitles(value) {
   //for now, just linear search through the titles
-  const thumbnails = document.getElementById('thumbnails-div').children;
-  for(let i = 0; i < thumbnails.length; i++) {
-    const title = ids_obj[thumbnails[i].getAttribute('id')]['title'];
+  for(let i = 0; i < elemsToSearch.length; i++) {
+    const title = ids_obj[elemsToSearch[i].getAttribute('id')]['title'];
     if(title.toLowerCase().includes(value.toLowerCase())) {
-      thumbnails[i].classList.remove('removed');
+      elemsToSearch[i].classList.remove('removed');
     } else {
-      thumbnails[i].classList.add('removed');
+      elemsToSearch[i].classList.add('removed');
     }
   }
+}
+
+//search by tags and display the thumbnails
+function searchTags(value) {
+  //find the tag
+  const tag = tags_obj[value];
+  if(tag !== undefined) {
+    const tagSet = new Set(tag['ids']);
+    for(let i = 0; i < elemsToSearch.length; i++) {
+      if(tagSet.has(elemsToSearch[i].getAttribute('id'))) {
+        elemsToSearch[i].classList.remove('removed');
+      } else {
+        elemsToSearch[i].classList.add('removed');
+      }
+    }
+  } else {
+    searchTitles('');
+  }
+}
+
+//adds the given value to the search list
+//sets elemsToSearch to only currently showing thumbnails
+function addToSearchList(value) {
+  const searchList = document.getElementById('search-list');
+  const item = document.createElement('span');
+  item.setAttribute('id', 'sl,' + value + ', ');
+  item.innerHTML = value;
+  searchList.appendChild(item);
+  for(let i = elemsToSearch.length - 1; i >= 0; i--) {
+    if(elemsToSearch[i].classList.contains('removed')) {
+      elemsToSearch.splice(i, 1);
+    }
+  }
+}
+
+//reshow all the thumbnails, clear the search list, reset elemsToSearch
+function clearSearch() {
+  elemsToSearch.length = 0;
+  elemsToSearch.push(...document.getElementById('thumbnails-div').children);
+  const searchList = document.getElementById('search-list');
+  while(searchList.firstChild) {
+    searchList.removeChild(searchList.lastChild);
+  }
+  searchTitles('');
 }
