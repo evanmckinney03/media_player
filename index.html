@@ -26,12 +26,18 @@
         </div>
       </div>
     </div>
-    <script src="index.js"></script>
+    <div id="search-div" class="flex-grid">
+      <select id="search-by">
+        <option value="title">Title</option>
+        <option value="tag">Tag</option>
+      </select>
+      <input type="text" id="search-input">
+      <p id="search-list"></p>
+      <input type="button" id="clear-search-button" value="Clear" class="removed">
+    </div>
     <div id="thumbnails-div" class="flex-grid">
-      <div id="col0" class="col"></div>
-      <div id="col1" class="col"></div>
-      <div id="col2" class="col"></div>
     </div>
   </div>
+  <script src="index.js"></script>
 </body>
 </html>

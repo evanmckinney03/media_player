@@ -1,8 +1,9 @@
-window.onload = init()
 
 let ids_obj;
 let tags_obj;
+const elemsToSearch = [];
 
+window.onload = init()
 function init() {
   displayFirstAndThumbnails();
   //get tags from server
@@ -37,6 +38,36 @@ function init() {
       }
     }
   });
+  
+  const searchBy = document.getElementById('search-by');
+  let searchByValue = searchBy.value;
+  searchBy.addEventListener('input', function(e) {
+    searchByValue = this.value;
+    //should probably also search values
+  });
+
+  const searchInput = document.getElementById('search-input');
+  searchInput.addEventListener('input', function(e) {
+    if(searchByValue === 'title') {
+      searchTitles(this.value);
+    } else {
+      searchTags(this.value);
+    }
+  });
+
+  const clearSearchButton = document.getElementById('clear-search-button');
+  clearSearchButton.addEventListener('click', function(e) {
+    this.classList.add('removed');
+    clearSearch();
+  });
+
+  searchInput.addEventListener('keypress', function(event) {
+    if(event.key == 'Enter') { 
+      clearSearchButton.classList.remove('removed');
+      addToSearchList(this.value);
+      this.value = '';
+    }
+  });
 }
 
 async function editTitle() {
@@ -58,8 +89,10 @@ async function displayFirstAndThumbnails(){
   const ids = Object.keys(ids_obj);
   displayVideo(ids[0], ids_obj[ids[0]]['title']);
   for(let i = 0; i < ids.length; i++) {
-    await createThumbnail(ids[i], i % 3, ids_obj[ids[i]]['title']);
+    await createThumbnail(ids[i], ids_obj[ids[i]]['title']);
   }
+  //after displaying the thumbnails, set elemsToSearch to all the thumbnails
+  elemsToSearch.push(...document.getElementById('thumbnails-div').children)
 }
 
 async function editTitle() {
@@ -67,7 +100,7 @@ async function editTitle() {
   const newTitle = this.value;
   //update the thumbnail
   //id is in the video element
-  const id = document.getElementById('src').getAttribute('src').split('/')[1].split('.')[0];
+  const id = getCurrentId();
   const div = document.getElementById(id);
   //works because title is first child, change if that changes in future
   div.firstElementChild.innerHTML = newTitle;
@@ -76,23 +109,28 @@ async function editTitle() {
   ids_obj = getData('edit_ids.py', 'POST', {id: id + '.mp4', title: newTitle});
 }
 
-async function createThumbnail(id, col, title) {
+async function createThumbnail(id, title) {
   const plainID = id.split('.')[0];
   const text = document.createElement('p');
   text.innerHTML = title;
   text.setAttribute('class', 'thumbnail-text');
   const img = document.createElement('img');
   img.setAttribute('src', 'thumbnails/' + plainID + '.jpg');
-  img.setAttribute('class', 'thumbnail');
+  img.setAttribute('class', 'thumbnail-img');
   img.addEventListener('click', function() {
-    const id = this.getAttribute('src').split('/')[1].split('.')[0];
-    displayVideo(id + '.mp4', title);
+    //the parent is the div container whose id is the video name
+    const id = this.parentNode.getAttribute('id');
+    const currentId = getCurrentId();
+    if(id != currentId) {
+      displayVideo(id, title);
+    }
   });
   const div = document.createElement('div');
   div.appendChild(text);
   div.appendChild(img);
-  div.setAttribute('id', plainID);
-  const pdiv = document.getElementById('col' + col);
+  div.setAttribute('id', id);
+  div.setAttribute('class', 'thumbnail');
+  const pdiv = document.getElementById('thumbnails-div');
   pdiv.appendChild(div);
 }
 
@@ -140,6 +178,12 @@ function displayVideo(id, title) {
   displayTags();
 }
 
+//returns the id of the video currently playing
+//includes file ext
+function getCurrentId() {
+  return document.getElementById('src').getAttribute('src').split('/')[1];
+}
+
 function editTagClicked() {
   //add to the tag menu
   const div = document.getElementById('tag-menu-div');
@@ -160,7 +204,7 @@ function displayTags(tag) {
   let tagList = [];
   const length = 'Tags:<br>'.length;
   if(tag === undefined) {
-    const id = document.getElementById('src').getAttribute('src').split('/')[1];
+    const id = getCurrentId();
     tagList = ids_obj[id]['tags'];
   } else {
     tagList.push(tag);
@@ -180,7 +224,7 @@ const tagsToSend = [];
 //also displayTags
 function addTag(tag) {
   //do not add duplicates
-  const id = document.getElementById('src').getAttribute('src').split('/')[1];
+  const id = getCurrentId();
   if(!ids_obj[id]['tags'].includes(tag) && !tagsToSend.includes(tag)) {
     tagsToSend.push(tag);
     displayTags(tag);
@@ -200,7 +244,7 @@ function tagClicked() {
   //and when clicked this func will run
   const div = document.getElementById('tag-menu-div');
   if(!div.classList.contains('removed')) {
-    const id = document.getElementById('src').getAttribute('src').split('/')[1];
+    const id = getCurrentId();
     const tagDiv = document.getElementById('tag-list');
     tagDiv.removeChild(this);
     //add tag to tags to remove
@@ -212,7 +256,7 @@ function tagClicked() {
 
 //send taglist to server
 async function sendTags() {
-  const id = document.getElementById('src').getAttribute('src').split('/')[1];
+  const id = getCurrentId();
   try {
     //if a tag is being removed, dont also send it
     const diff1 = tagsToSend.filter(x => !tagsToRemove.includes(x));
@@ -229,4 +273,62 @@ async function sendTags() {
   } catch {
     console.error('Unable to send tags to server');
   }
+}
+
+//during init, set this to all the thumbnail divs
+//search by titles and display the thumbnails
+function searchTitles(value) {
+  //for now, just linear search through the titles
+  for(let i = 0; i < elemsToSearch.length; i++) {
+    const title = ids_obj[elemsToSearch[i].getAttribute('id')]['title'];
+    if(title.toLowerCase().includes(value.toLowerCase())) {
+      elemsToSearch[i].classList.remove('removed');
+    } else {
+      elemsToSearch[i].classList.add('removed');
+    }
+  }
+}
+
+//search by tags and display the thumbnails
+function searchTags(value) {
+  //find the tag
+  const tag = tags_obj[value];
+  if(tag !== undefined) {
+    const tagSet = new Set(tag['ids']);
+    for(let i = 0; i < elemsToSearch.length; i++) {
+      if(tagSet.has(elemsToSearch[i].getAttribute('id'))) {
+        elemsToSearch[i].classList.remove('removed');
+      } else {
+        elemsToSearch[i].classList.add('removed');
+      }
+    }
+  } else {
+    searchTitles('');
+  }
+}
+
+//adds the given value to the search list
+//sets elemsToSearch to only currently showing thumbnails
+function addToSearchList(value) {
+  const searchList = document.getElementById('search-list');
+  const item = document.createElement('span');
+  item.setAttribute('id', 'sl,' + value + ', ');
+  item.innerHTML = value;
+  searchList.appendChild(item);
+  for(let i = elemsToSearch.length - 1; i >= 0; i--) {
+    if(elemsToSearch[i].classList.contains('removed')) {
+      elemsToSearch.splice(i, 1);
+    }
+  }
+}
+
+//reshow all the thumbnails, clear the search list, reset elemsToSearch
+function clearSearch() {
+  elemsToSearch.length = 0;
+  elemsToSearch.push(...document.getElementById('thumbnails-div').children);
+  const searchList = document.getElementById('search-list');
+  while(searchList.firstChild) {
+    searchList.removeChild(searchList.lastChild);
+  }
+  searchTitles('');
 }

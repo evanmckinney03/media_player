@@ -3,18 +3,14 @@
   display: flex;
 }
 
-.col {
-  flex: 1;
-}
-
 .flex-column {
   display: flex;
   flex-direction: column;
 }
 
 #thumbnails-div {
-  width: 100%;
   background-color: yellow;
+  flex-wrap: wrap;
 }
 
 #about-div {
@@ -24,7 +20,13 @@
 }
 
 .thumbnail {
+  max-width: 33%;
+  min-width: 33%;
+}
+
+.thumbnail-img {
   max-width: 100%;
+  min-width: 100%;
 }
 
 #video {
