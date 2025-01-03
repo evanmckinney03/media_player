@@ -70,7 +70,12 @@ function init() {
   });
 
   const updateThumbnailButton = document.getElementById('update-thumbnail-button');
-  updateThumbnailButton.addEventListener('click', updateThumbnail);
+  updateThumbnailButton.addEventListener('click', function() {
+    this.disabled = true;
+    updateThumbnail().then(function(e) {
+      updateThumbnailButton.disabled = false;
+    })
+  });
 }
 
 async function displayFirstAndThumbnails(){

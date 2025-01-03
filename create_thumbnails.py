@@ -44,7 +44,7 @@ try:
             cam.release()
             #delete the old thumbnail
             old_url = current_ids[i]['thumbnail-url']
-            if(len(old_url) > 0):
+            if(os.path.exists(old_url)):
                 os.remove(old_url)
             current_ids[i]['thumbnail-url'] = url
         except:
