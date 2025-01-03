@@ -68,6 +68,9 @@ function init() {
       this.value = '';
     }
   });
+
+  const updateThumbnailButton = document.getElementById('update-thumbnail-button');
+  updateThumbnailButton.addEventListener('click', updateThumbnail);
 }
 
 async function editTitle() {
@@ -331,4 +334,14 @@ function clearSearch() {
     searchList.removeChild(searchList.lastChild);
   }
   searchTitles('');
+}
+
+//gets the current position of the video and updates the thumbnail to be that frame
+function updateThumbnail() {
+  const video = document.getElementById('video');
+  //server expects timestamp to be in milliseconds
+  const timestamp = 1000 * video.currentTime;
+  const id = getCurrentId();
+  //should probably be in a try catch
+  getData('create_thumbnails.py', 'POST', {ids: id, timestamps: timestamp});
 }
