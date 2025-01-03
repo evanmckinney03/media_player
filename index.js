@@ -73,20 +73,15 @@ function init() {
   updateThumbnailButton.addEventListener('click', updateThumbnail);
 }
 
-async function editTitle() {
-  this.setAttribute('readonly', '');
-  const newTitle = this.value;
-}
-
 async function displayFirstAndThumbnails(){
   try {
     const json = await getData('json/ids.json', 'GET');
     ids_obj = json;
   } catch {
     //error getting ids.json, meaning it does not exist
-    const json = await getData('create_ids.py', 'POST');
+    await getData('create_ids.py', 'POST');
     //also generate thumbnails for the videos
-    await getData('create_thumbnails.py', 'POST');
+    const json = await getData('create_thumbnails.py', 'POST');
     ids_obj = json;
   }
   const ids = Object.keys(ids_obj);
@@ -109,16 +104,15 @@ async function editTitle() {
   div.firstElementChild.innerHTML = newTitle;
 
   //make a post request to edit title on server
-  ids_obj = getData('edit_ids.py', 'POST', {id: id + '.mp4', title: newTitle});
+  ids_obj = await getData('edit_ids.py', 'POST', {id: id, title: newTitle});
 }
 
 async function createThumbnail(id, title) {
-  const plainID = id.split('.')[0];
   const text = document.createElement('p');
   text.innerHTML = title;
   text.setAttribute('class', 'thumbnail-text');
   const img = document.createElement('img');
-  img.setAttribute('src', 'thumbnails/' + plainID + '.jpg');
+  img.setAttribute('src', ids_obj[id]['thumbnail-url']);
   img.setAttribute('class', 'thumbnail-img');
   img.addEventListener('click', function() {
     //the parent is the div container whose id is the video name
@@ -265,13 +259,13 @@ async function sendTags() {
     const diff1 = tagsToSend.filter(x => !tagsToRemove.includes(x));
     if(diff1.length > 0) {
       ids_obj = await getData('add_tags.py', 'POST', {id: id, tags: diff1});
-      tags_obj = getTags();
+      tags_obj = await getTags();
     }
     //if a tag was added then removed, dont need to remove it still
     const diff2 = tagsToRemove.filter(x => !tagsToSend.includes(x));
     if(diff2.length > 0) {
       ids_obj = await getData('remove_tags.py', 'POST', {id: id, tags: diff2});
-      tags_obj = getTags();
+      tags_obj = await getTags();
     }
   } catch {
     console.error('Unable to send tags to server');
@@ -337,11 +331,14 @@ function clearSearch() {
 }
 
 //gets the current position of the video and updates the thumbnail to be that frame
-function updateThumbnail() {
+async function updateThumbnail() {
   const video = document.getElementById('video');
   //server expects timestamp to be in milliseconds
   const timestamp = 1000 * video.currentTime;
   const id = getCurrentId();
   //should probably be in a try catch
-  getData('create_thumbnails.py', 'POST', {ids: id, timestamps: timestamp});
+  ids_obj = await getData('create_thumbnails.py', 'POST', {ids: id, timestamps: timestamp});
+  //change the thumbnail img url to the new one
+  const img = document.getElementById(id).querySelector('img');
+  img.src = ids_obj[id]['thumbnail-url'];
 }
