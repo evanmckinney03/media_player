@@ -39,8 +39,34 @@
 
 #title {
   margin: 0px;
+  background-color: transparent;
+  border: none;
+  flex: 1;
+  font-size: 25px;
+  min-width: 0;
+  resize: none;
+}
+#title-div {
+  align-items: end;
 }
 
 .removed {
-  display: none;
+  display: none !important;
+}
+
+.tag {
+  background-color: lightgrey;
+  font-family: Lucida Console, monospace;
+  padding: 2px;
+  border: 1px, solid, black;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.x {
+  font-size: inherit !important;
+}
+
+#tag-list {
+  flex-wrap: wrap;
 }

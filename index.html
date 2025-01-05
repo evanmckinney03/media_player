@@ -3,6 +3,7 @@
 <head>
   <title>Testing Fetch API</title>
   <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 <body>
   <div id="main-div">
@@ -10,13 +11,12 @@
       <video controls id="video"></video>
       <div id="about-div">
         <div id="title-div" class="flex-grid">
-          <input type="text" id="title">
-	  <input type="button" value="Edit" id="edit-title-button">
+	  <textarea id="title" rows="1"></textarea>
+          <span class="material-icons" id="edit-title-button">edit</span>
 	</div>
         <div id="tags-div" class="flex-column">
 	  <p>Tags:</p>
-	  <div class="flex-grid">
-	  <p id="tag-list"></p>
+	  <div id="tag-list" class="flex-grid">
           <input type="button" value="Edit" id="edit-tag-button">
 	  </div>
         </div>
