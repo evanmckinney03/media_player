@@ -27,10 +27,14 @@ function init() {
     }
   });
   const editTagButton = document.getElementById('edit-tag-button');
-  editTagButton.addEventListener('click', editTagClicked);
-
-  const doneTagsButton = document.getElementById('tag-done-button');
-  doneTagsButton.addEventListener('click', doneTagsClicked);
+  const tagMenu = document.getElementById('tag-menu-div');
+  editTagButton.addEventListener('click', function() {
+    if(tagMenu.classList.contains('removed')) {
+      editTagClicked();
+    } else {
+      doneTagsClicked();
+    }
+  });
 
   const tagInputField = document.getElementById('tag-input');
   tagInputField.addEventListener('keypress', function(event) {
@@ -202,7 +206,6 @@ function editTagClicked() {
 }
 
 function doneTagsClicked() {
-  this.parentNode.classList.add('removed');
   if(tagsToSend.length != 0 || tagsToRemove.length != 0) {
     sendTags();
   }
@@ -210,6 +213,7 @@ function doneTagsClicked() {
   for(let i = 0; i < tagListDiv.children.length - 1; i++) {
     tagListDiv.children[i].lastElementChild.classList.add('removed');
   }
+  document.getElementById('tag-menu-div').classList.add('removed');
 }
 
 //will update tags
