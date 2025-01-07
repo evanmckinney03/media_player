@@ -43,7 +43,7 @@
   border: none;
   flex: 1;
   font-family: Verdana, Arial, sans-serif;
-  font-size: 25px;
+  font-size: 30px;
   min-width: 0;
   resize: none;
 }
@@ -59,9 +59,9 @@
   background-color: lightgrey;
   font-family: Lucida Console, monospace;
   padding: 2px;
-  border: 1px, solid, black;
+  border: 2px, solid, black;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: 20px;
 }
 
 .tag-padding {
@@ -81,4 +81,9 @@
 #tag-label {
   font-family: Verdana, Arial, sans-serif;
   margin-bottom: 2px;
+  font-size: 18px;
+}
+
+#about-div {
+  margin: 5px;
 }
