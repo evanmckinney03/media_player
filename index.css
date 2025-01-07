@@ -42,6 +42,7 @@
   background-color: transparent;
   border: none;
   flex: 1;
+  font-family: Verdana, Arial, sans-serif;
   font-size: 25px;
   min-width: 0;
   resize: none;
@@ -75,4 +76,9 @@
 #tag-list {
   flex-wrap: wrap;
   align-items: center;
+}
+
+#tag-label {
+  font-family: Verdana, Arial, sans-serif;
+  margin-bottom: 2px;
 }
