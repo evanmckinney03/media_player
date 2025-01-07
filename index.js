@@ -202,6 +202,7 @@ function editTagClicked() {
   const tagListDiv = document.getElementById('tag-list');
   for(let i = 0; i < tagListDiv.children.length - 1; i++) {
     tagListDiv.children[i].lastElementChild.classList.remove('removed');
+    tagListDiv.children[i].classList.remove('tag-padding');
   }
 }
 
@@ -212,6 +213,7 @@ function doneTagsClicked() {
   const tagListDiv = document.getElementById('tag-list');
   for(let i = 0; i < tagListDiv.children.length - 1; i++) {
     tagListDiv.children[i].lastElementChild.classList.add('removed');
+    tagListDiv.children[i].classList.add('tag-padding');
   }
   document.getElementById('tag-menu-div').classList.add('removed');
 }
@@ -234,6 +236,7 @@ function displayTags(tag) {
     tagDiv.setAttribute('id', 'tag,' + tagList[i]);
     tagDiv.classList.add('flex-grid');
     tagDiv.classList.add('tag');
+    tagDiv.classList.add('tag-padding');
     const tagSpan = document.createElement('span');
     tagSpan.innerHTML = tagList[i];
     const x = document.createElement('span');

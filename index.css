@@ -63,6 +63,11 @@
   font-size: 13px;
 }
 
+.tag-padding {
+  padding-left: 0.65em;
+  padding-right: 0.65em;
+}
+
 .x {
   font-size: inherit !important;
 }
