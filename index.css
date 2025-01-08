@@ -39,8 +39,51 @@
 
 #title {
   margin: 0px;
+  background-color: transparent;
+  border: none;
+  flex: 1;
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 30px;
+  min-width: 0;
+  resize: none;
+}
+#title-div {
+  align-items: end;
 }
 
 .removed {
-  display: none;
+  display: none !important;
+}
+
+.tag {
+  background-color: lightgrey;
+  font-family: Lucida Console, monospace;
+  padding: 2px;
+  border: 2px, solid, black;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.tag-padding {
+  padding-left: 0.65em;
+  padding-right: 0.65em;
+}
+
+.x {
+  font-size: inherit !important;
+}
+
+#tag-list {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+#tag-label {
+  font-family: Verdana, Arial, sans-serif;
+  margin-bottom: 2px;
+  font-size: 18px;
+}
+
+#about-div {
+  margin: 5px;
 }

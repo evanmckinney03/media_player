@@ -12,6 +12,8 @@ function init() {
   const editTitleButton = document.getElementById('edit-title-button');
   editTitleButton.addEventListener('click', function() {
     const titleElem = document.getElementById('title');
+    //set focus to titleElem
+    titleElem.focus();
     titleElem.removeAttribute('readonly');
     title.addEventListener('blur', editTitle, {once: true});
   });
@@ -21,13 +23,18 @@ function init() {
       //remove the event listener that waits for input to lose focus
       this.removeEventListener('blur', editTitle);
       editTitle.call(this);
+      this.blur();
     }
   });
   const editTagButton = document.getElementById('edit-tag-button');
-  editTagButton.addEventListener('click', editTagClicked);
-
-  const doneTagsButton = document.getElementById('tag-done-button');
-  doneTagsButton.addEventListener('click', doneTagsClicked);
+  const tagMenu = document.getElementById('tag-menu-div');
+  editTagButton.addEventListener('click', function() {
+    if(tagMenu.classList.contains('removed')) {
+      editTagClicked();
+    } else {
+      doneTagsClicked();
+    }
+  });
 
   const tagInputField = document.getElementById('tag-input');
   tagInputField.addEventListener('keypress', function(event) {
@@ -105,11 +112,13 @@ async function editTitle() {
   //id is in the video element
   const id = getCurrentId();
   const div = document.getElementById(id);
-  //works because title is first child, change if that changes in future
-  div.firstElementChild.innerHTML = newTitle;
+  if(newTitle !== ids_obj[id]['title']) {
+    //works because title is first child, change if that changes in future
+    div.firstElementChild.innerHTML = newTitle;
 
-  //make a post request to edit title on server
-  ids_obj = await getData('edit_ids.py', 'POST', {id: id, title: newTitle});
+    //make a post request to edit title on server
+    ids_obj = await getData('edit_ids.py', 'POST', {id: id, title: newTitle});
+  }
 }
 
 async function createThumbnail(id, title) {
@@ -172,10 +181,10 @@ function displayVideo(id, title) {
   titleElem.setAttribute('readonly', '');
   video.load();
 
-  //also must display tags, but clear them first
+  //also must display tags, but clear them first except the button
   const tagList = document.getElementById('tag-list');
-  while(tagList.firstChild) {
-    tagList.removeChild(tagList.lastChild);
+  while(tagList.children.length > 1) {
+    tagList.removeChild(tagList.firstChild);
   }
   displayTags();
 }
@@ -188,15 +197,25 @@ function getCurrentId() {
 
 function editTagClicked() {
   //add to the tag menu
-  const div = document.getElementById('tag-menu-div');
-  div.classList.remove('removed');  
+  const menuDiv = document.getElementById('tag-menu-div');
+  menuDiv.classList.remove('removed'); 
+  const tagListDiv = document.getElementById('tag-list');
+  for(let i = 0; i < tagListDiv.children.length - 1; i++) {
+    tagListDiv.children[i].lastElementChild.classList.remove('removed');
+    tagListDiv.children[i].classList.remove('tag-padding');
+  }
 }
 
 function doneTagsClicked() {
-  this.parentNode.classList.add('removed');
   if(tagsToSend.length != 0 || tagsToRemove.length != 0) {
     sendTags();
   }
+  const tagListDiv = document.getElementById('tag-list');
+  for(let i = 0; i < tagListDiv.children.length - 1; i++) {
+    tagListDiv.children[i].lastElementChild.classList.add('removed');
+    tagListDiv.children[i].classList.add('tag-padding');
+  }
+  document.getElementById('tag-menu-div').classList.add('removed');
 }
 
 //will update tags
@@ -213,11 +232,25 @@ function displayTags(tag) {
   }
   const tagsElem = document.getElementById('tag-list');
   for(let i = 0; i < tagList.length; i++) {
-    const span = document.createElement('span');
-    span.addEventListener('click', tagClicked);
-    span.setAttribute('id', 'tag,' + tagList[i]);
-    span.innerHTML = tagList[i] + ', ';
-    tagsElem.appendChild(span)
+    const tagDiv = document.createElement('div');
+    tagDiv.setAttribute('id', 'tag,' + tagList[i]);
+    tagDiv.classList.add('flex-grid');
+    tagDiv.classList.add('tag');
+    tagDiv.classList.add('tag-padding');
+    const tagSpan = document.createElement('span');
+    tagSpan.innerHTML = tagList[i];
+    const x = document.createElement('span');
+    x.addEventListener('click', tagClicked);
+    x.classList.add('x');
+    //if currently adding tags, then there should be an x
+    if(document.getElementById('tag-menu-div').classList.contains('removed')) {
+      x.classList.add('removed');
+    }
+    x.classList.add('material-icons');
+    x.innerHTML = 'close';
+    tagDiv.appendChild(tagSpan);
+    tagDiv.appendChild(x);
+    tagsElem.insertBefore(tagDiv, tagsElem.lastElementChild);
   }
 }
 
@@ -248,16 +281,18 @@ function tagClicked() {
   if(!div.classList.contains('removed')) {
     const id = getCurrentId();
     const tagDiv = document.getElementById('tag-list');
-    tagDiv.removeChild(this);
+    tagDiv.removeChild(this.parentNode);
     //add tag to tags to remove
     //start from 4 because first three letters are 'tag,'
-    const tag = this.getAttribute('id').slice(4);
+    const tag = this.parentNode.getAttribute('id').slice(4);
     tagsToRemove.push(tag);
   }
 }
 
 //send taglist to server
 async function sendTags() {
+  console.log(tagsToSend)
+  console.log(tagsToRemove)
   const id = getCurrentId();
   try {
     //if a tag is being removed, dont also send it
@@ -275,6 +310,8 @@ async function sendTags() {
   } catch {
     console.error('Unable to send tags to server');
   }
+  tagsToSend.length = 0;
+  tagsToRemove.length = 0;
 }
 
 //during init, set this to all the thumbnail divs
