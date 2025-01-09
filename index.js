@@ -384,3 +384,14 @@ async function updateThumbnail() {
   const img = document.getElementById(id).querySelector('img');
   img.src = ids_obj[id]['thumbnail-url'];
 }
+
+//adds tags from tags_obj to the datalist
+function addTagsToDatalist() {
+  const datalist = document.getElementById('tags-datalist');
+  const tags = Object.keys(tags_obj);
+  for(let i = 0; i < tags.length; i++) {
+    const option = document.createElement('option');
+    option.setAttribute('value', tags[i]);
+    datalist.appendChild(option);
+  }
+}
