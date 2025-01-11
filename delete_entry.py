@@ -49,6 +49,7 @@ try:
 
 except KeyError:
     #there are no ids, try the tags next
+    location = 'json/tags.json'
     pass
 
 except (FileNotFoundError, json.JSONDecodeError):

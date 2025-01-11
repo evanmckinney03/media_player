@@ -5,9 +5,9 @@ const elemsToSearch = [];
 
 window.onload = init()
 function init() {
-  displayFirstAndThumbnails();
   //get tags from server
   getTags();
+  displayFirstAndThumbnails();
   //add an event listener to the edit button to make the title editable
   const editTitleButton = document.getElementById('edit-title-button');
   editTitleButton.addEventListener('click', function() {
@@ -83,6 +83,7 @@ function init() {
       updateThumbnailButton.disabled = false;
     })
   });
+
 }
 
 async function displayFirstAndThumbnails(){
@@ -102,7 +103,10 @@ async function displayFirstAndThumbnails(){
     await createThumbnail(ids[i], ids_obj[ids[i]]['title']);
   }
   //after displaying the thumbnails, set elemsToSearch to all the thumbnails
-  elemsToSearch.push(...document.getElementById('thumbnails-div').children)
+  elemsToSearch.push(...document.getElementById('thumbnails-div').children);
+
+  //also add the tags to the datalist
+  addTagsToDatalist();
 }
 
 async function editTitle() {
@@ -291,24 +295,33 @@ function tagClicked() {
 
 //send taglist to server
 async function sendTags() {
-  console.log(tagsToSend)
-  console.log(tagsToRemove)
   const id = getCurrentId();
   try {
     //if a tag is being removed, dont also send it
     const diff1 = tagsToSend.filter(x => !tagsToRemove.includes(x));
     if(diff1.length > 0) {
       ids_obj = await getData('add_tags.py', 'POST', {id: id, tags: diff1});
-      tags_obj = await getTags();
+      await getTags();
     }
     //if a tag was added then removed, dont need to remove it still
     const diff2 = tagsToRemove.filter(x => !tagsToSend.includes(x));
     if(diff2.length > 0) {
       ids_obj = await getData('remove_tags.py', 'POST', {id: id, tags: diff2});
-      tags_obj = await getTags();
+      await getTags();
+      //diff two contains the tags that were removed
+      for(let i = diff2.length - 1; i >= 0; i--) {
+        if(tags_obj[diff2[i]]['ids'].length > 0) {
+          diff2.splice(i, 1);
+        }
+      }
+      console.log(diff2);
+      //diff two now contains tags with no ids, so remove them
+      tags_obj = await getData('delete_entry.py', 'POST', {tags: diff2});
     }
-  } catch {
+  } catch ({name, message}){
     console.error('Unable to send tags to server');
+    console.log(name)
+    console.log(message)
   }
   tagsToSend.length = 0;
   tagsToRemove.length = 0;
