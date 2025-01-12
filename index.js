@@ -5,8 +5,6 @@ const elemsToSearch = [];
 
 window.onload = init()
 function init() {
-  //get tags from server
-  getTags();
   displayFirstAndThumbnails();
   //add an event listener to the edit button to make the title editable
   const editTitleButton = document.getElementById('edit-title-button');
@@ -97,6 +95,7 @@ async function displayFirstAndThumbnails(){
     const json = await getData('create_thumbnails.py', 'POST');
     ids_obj = json;
   }
+  await getTags();
   const ids = Object.keys(ids_obj);
   displayVideo(ids[0], ids_obj[ids[0]]['title']);
   for(let i = 0; i < ids.length; i++) {
@@ -104,9 +103,6 @@ async function displayFirstAndThumbnails(){
   }
   //after displaying the thumbnails, set elemsToSearch to all the thumbnails
   elemsToSearch.push(...document.getElementById('thumbnails-div').children);
-
-  //also add the tags to the datalist
-  addTagsToDatalist();
 }
 
 async function editTitle() {
@@ -178,7 +174,10 @@ function displayVideo(id, title) {
     src.setAttribute('id', 'src');
     src.setAttribute('type', 'video/mp4');
     video.appendChild(src);
-  } 
+    addTagsToDatalist();
+  } else {
+    addTagsToDatalist(ids_obj[src.getAttribute('src').slice('videos/'.length)]['tags']);
+  }
   src.setAttribute('src', 'videos/' + id);
   const titleElem = document.getElementById('title');
   titleElem.value = title;
@@ -191,6 +190,9 @@ function displayVideo(id, title) {
     tagList.removeChild(tagList.firstChild);
   }
   displayTags();
+
+  //also add the tags to the datalist
+  removeTagsFromDatalist(ids_obj[id]['tags']);
 }
 
 //returns the id of the video currently playing
@@ -267,11 +269,13 @@ function addTag(tag) {
   if(!ids_obj[id]['tags'].includes(tag) && !tagsToSend.includes(tag)) {
     tagsToSend.push(tag);
     displayTags(tag);
+    removeTagsFromDatalist([tag]);
   } else {
     const index = tagsToRemove.indexOf(tag);
     if(index != -1) {
       tagsToRemove.splice(index, 1);
       displayTags(tag);
+      removeTagsFromDatalist([tag]);
     }
   }
 }
@@ -290,6 +294,7 @@ function tagClicked() {
     //start from 4 because first three letters are 'tag,'
     const tag = this.parentNode.getAttribute('id').slice(4);
     tagsToRemove.push(tag);
+    addTagsToDatalist([tag]);
   }
 }
 
@@ -300,8 +305,12 @@ async function sendTags() {
     //if a tag is being removed, dont also send it
     const diff1 = tagsToSend.filter(x => !tagsToRemove.includes(x));
     if(diff1.length > 0) {
+      const initLength = Object.keys(tags_obj).length;
       ids_obj = await getData('add_tags.py', 'POST', {id: id, tags: diff1});
       await getTags();
+      if(Object.keys(tags_obj).length > initLength) {
+        console.log('new key')
+      }
     }
     //if a tag was added then removed, dont need to remove it still
     const diff2 = tagsToRemove.filter(x => !tagsToSend.includes(x));
@@ -399,12 +408,24 @@ async function updateThumbnail() {
 }
 
 //adds tags from tags_obj to the datalist
-function addTagsToDatalist() {
+function addTagsToDatalist(tagsToAdd) {
+  const tags = tagsToAdd === undefined ? Object.keys(tags_obj) : tagsToAdd;
   const datalist = document.getElementById('tags-datalist');
-  const tags = Object.keys(tags_obj);
   for(let i = 0; i < tags.length; i++) {
     const option = document.createElement('option');
     option.setAttribute('value', tags[i]);
+    option.setAttribute('id', 'opt,' + tags[i]);
     datalist.appendChild(option);
+  }
+}
+
+//removes the tags in the given array from the datalist
+function removeTagsFromDatalist(tags) {
+  const datalist = document.getElementById('tags-datalist');
+  for(let i = 0; i < tags.length; i++) {
+    const opt = document.getElementById('opt,' + tags[i]);
+    if(opt !== undefined) {
+      datalist.removeChild(opt);
+    }
   }
 }
