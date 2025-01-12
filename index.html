@@ -21,7 +21,9 @@
 	  </div>
         </div>
         <div id="tag-menu-div" class="removed"> 
-          <input type="text" id="tag-input">
+          <input type="text" list="tags-datalist" id="tag-input" autocomplete="off">
+	  <datalist id="tags-datalist">
+          </datalist>
         </div>
 	<div id="thumbnail-controller-div">
           <input type="button" value="Update Thumbnail" id="update-thumbnail-button">
@@ -33,9 +35,11 @@
         <option value="title">Title</option>
         <option value="tag">Tag</option>
       </select>
-      <input type="text" id="search-input">
+      <input type="text" id="search-input" autocomplete="off">
       <p id="search-list"></p>
       <input type="button" id="clear-search-button" value="Clear" class="removed">
+      <datalist id="all-tags-datalist">
+      </datalist>
     </div>
     <div id="thumbnails-div" class="flex-grid">
     </div>

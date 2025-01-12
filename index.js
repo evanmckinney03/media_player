@@ -6,8 +6,6 @@ const elemsToSearch = [];
 window.onload = init()
 function init() {
   displayFirstAndThumbnails();
-  //get tags from server
-  getTags();
   //add an event listener to the edit button to make the title editable
   const editTitleButton = document.getElementById('edit-title-button');
   editTitleButton.addEventListener('click', function() {
@@ -47,13 +45,18 @@ function init() {
   });
   
   const searchBy = document.getElementById('search-by');
+  const searchInput = document.getElementById('search-input');
   let searchByValue = searchBy.value;
   searchBy.addEventListener('input', function(e) {
     searchByValue = this.value;
+    if(this.value == 'tag') {
+      searchInput.setAttribute('list', 'all-tags-datalist');
+    } else {
+      searchInput.removeAttribute('list');
+    }
     //should probably also search values
   });
 
-  const searchInput = document.getElementById('search-input');
   searchInput.addEventListener('input', function(e) {
     if(searchByValue === 'title') {
       searchTitles(this.value);
@@ -96,13 +99,24 @@ async function displayFirstAndThumbnails(){
     const json = await getData('create_thumbnails.py', 'POST');
     ids_obj = json;
   }
+  await getTags();
   const ids = Object.keys(ids_obj);
   displayVideo(ids[0], ids_obj[ids[0]]['title']);
   for(let i = 0; i < ids.length; i++) {
     await createThumbnail(ids[i], ids_obj[ids[i]]['title']);
   }
   //after displaying the thumbnails, set elemsToSearch to all the thumbnails
-  elemsToSearch.push(...document.getElementById('thumbnails-div').children)
+  elemsToSearch.push(...document.getElementById('thumbnails-div').children);
+
+  //also populate the all-tags-datalist
+  const datalist = document.getElementById('all-tags-datalist');
+  const tags = Object.keys(tags_obj);
+  for(let i = 0; i < tags.length; i++) {
+    const option = document.createElement('option');
+    option.setAttribute('value', tags[i]);
+    option.setAttribute('id', 'all,' + tags[i]);
+    datalist.appendChild(option);
+  }
 }
 
 async function editTitle() {
@@ -174,7 +188,10 @@ function displayVideo(id, title) {
     src.setAttribute('id', 'src');
     src.setAttribute('type', 'video/mp4');
     video.appendChild(src);
-  } 
+    addTagsToDatalist();
+  } else {
+    addTagsToDatalist(ids_obj[src.getAttribute('src').slice('videos/'.length)]['tags']);
+  }
   src.setAttribute('src', 'videos/' + id);
   const titleElem = document.getElementById('title');
   titleElem.value = title;
@@ -187,6 +204,9 @@ function displayVideo(id, title) {
     tagList.removeChild(tagList.firstChild);
   }
   displayTags();
+
+  //also add the tags to the datalist
+  removeTagsFromDatalist(ids_obj[id]['tags']);
 }
 
 //returns the id of the video currently playing
@@ -263,11 +283,13 @@ function addTag(tag) {
   if(!ids_obj[id]['tags'].includes(tag) && !tagsToSend.includes(tag)) {
     tagsToSend.push(tag);
     displayTags(tag);
+    removeTagsFromDatalist([tag]);
   } else {
     const index = tagsToRemove.indexOf(tag);
     if(index != -1) {
       tagsToRemove.splice(index, 1);
       displayTags(tag);
+      removeTagsFromDatalist([tag]);
     }
   }
 }
@@ -286,29 +308,52 @@ function tagClicked() {
     //start from 4 because first three letters are 'tag,'
     const tag = this.parentNode.getAttribute('id').slice(4);
     tagsToRemove.push(tag);
+    addTagsToDatalist([tag]);
   }
 }
 
 //send taglist to server
 async function sendTags() {
-  console.log(tagsToSend)
-  console.log(tagsToRemove)
   const id = getCurrentId();
+  const datalist = document.getElementById('all-tags-datalist');
   try {
     //if a tag is being removed, dont also send it
     const diff1 = tagsToSend.filter(x => !tagsToRemove.includes(x));
     if(diff1.length > 0) {
       ids_obj = await getData('add_tags.py', 'POST', {id: id, tags: diff1});
-      tags_obj = await getTags();
+      await getTags();
+      //add to all tags datalist
+      for(let i = 0; i < diff1.length; i++) {
+        if(document.getElementById('all,' + diff1[i]) == null) {
+          const option = document.createElement('option');
+          option.setAttribute('value', diff1[i]);
+          option.setAttribute('id', 'all,' + diff1[i]);
+          datalist.appendChild(option);
+	}
+      }
     }
     //if a tag was added then removed, dont need to remove it still
     const diff2 = tagsToRemove.filter(x => !tagsToSend.includes(x));
     if(diff2.length > 0) {
       ids_obj = await getData('remove_tags.py', 'POST', {id: id, tags: diff2});
-      tags_obj = await getTags();
+      await getTags();
+      //diff two contains the tags that were removed
+      for(let i = diff2.length - 1; i >= 0; i--) {
+        if(tags_obj[diff2[i]]['ids'].length > 0) {
+          diff2.splice(i, 1);
+	} else {
+          //remove it from the datalists
+          datalist.removeChild(document.getElementById('all,' + diff2[i]));
+          removeTagsFromDatalist([diff2[i]]);
+        }
+      }
+      //diff two now contains tags with no ids, so remove them
+      tags_obj = await getData('delete_entry.py', 'POST', {tags: diff2});
     }
-  } catch {
+  } catch ({name, message}){
     console.error('Unable to send tags to server');
+    console.log(name)
+    console.log(message)
   }
   tagsToSend.length = 0;
   tagsToRemove.length = 0;
@@ -383,4 +428,27 @@ async function updateThumbnail() {
   //change the thumbnail img url to the new one
   const img = document.getElementById(id).querySelector('img');
   img.src = ids_obj[id]['thumbnail-url'];
+}
+
+//adds tags from tags_obj to the datalist
+function addTagsToDatalist(tagsToAdd) {
+  const tags = tagsToAdd === undefined ? Object.keys(tags_obj) : tagsToAdd;
+  const datalist = document.getElementById('tags-datalist');
+  for(let i = 0; i < tags.length; i++) {
+    const option = document.createElement('option');
+    option.setAttribute('value', tags[i]);
+    option.setAttribute('id', 'opt,' + tags[i]);
+    datalist.appendChild(option);
+  }
+}
+
+//removes the tags in the given array from the datalist
+function removeTagsFromDatalist(tags) {
+  const datalist = document.getElementById('tags-datalist');
+  for(let i = 0; i < tags.length; i++) {
+    const opt = document.getElementById('opt,' + tags[i]);
+    if(opt !== null) {
+      datalist.removeChild(opt);
+    }
+  }
 }
