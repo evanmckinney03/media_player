@@ -45,13 +45,18 @@ function init() {
   });
   
   const searchBy = document.getElementById('search-by');
+  const searchInput = document.getElementById('search-input');
   let searchByValue = searchBy.value;
   searchBy.addEventListener('input', function(e) {
     searchByValue = this.value;
+    if(this.value == 'tag') {
+      searchInput.setAttribute('list', 'all-tags-datalist');
+    } else {
+      searchInput.removeAttribute('list');
+    }
     //should probably also search values
   });
 
-  const searchInput = document.getElementById('search-input');
   searchInput.addEventListener('input', function(e) {
     if(searchByValue === 'title') {
       searchTitles(this.value);
@@ -81,7 +86,6 @@ function init() {
       updateThumbnailButton.disabled = false;
     })
   });
-
 }
 
 async function displayFirstAndThumbnails(){
@@ -103,6 +107,16 @@ async function displayFirstAndThumbnails(){
   }
   //after displaying the thumbnails, set elemsToSearch to all the thumbnails
   elemsToSearch.push(...document.getElementById('thumbnails-div').children);
+
+  //also populate the all-tags-datalist
+  const datalist = document.getElementById('all-tags-datalist');
+  const tags = Object.keys(tags_obj);
+  for(let i = 0; i < tags.length; i++) {
+    const option = document.createElement('option');
+    option.setAttribute('value', tags[i]);
+    option.setAttribute('id', 'all,' + tags[i]);
+    datalist.appendChild(option);
+  }
 }
 
 async function editTitle() {
@@ -301,15 +315,21 @@ function tagClicked() {
 //send taglist to server
 async function sendTags() {
   const id = getCurrentId();
+  const datalist = document.getElementById('all-tags-datalist');
   try {
     //if a tag is being removed, dont also send it
     const diff1 = tagsToSend.filter(x => !tagsToRemove.includes(x));
     if(diff1.length > 0) {
-      const initLength = Object.keys(tags_obj).length;
       ids_obj = await getData('add_tags.py', 'POST', {id: id, tags: diff1});
       await getTags();
-      if(Object.keys(tags_obj).length > initLength) {
-        console.log('new key')
+      //add to all tags datalist
+      for(let i = 0; i < diff1.length; i++) {
+        if(document.getElementById('all,' + diff1[i]) == null) {
+          const option = document.createElement('option');
+          option.setAttribute('value', diff1[i]);
+          option.setAttribute('id', 'all,' + diff1[i]);
+          datalist.appendChild(option);
+	}
       }
     }
     //if a tag was added then removed, dont need to remove it still
@@ -321,9 +341,12 @@ async function sendTags() {
       for(let i = diff2.length - 1; i >= 0; i--) {
         if(tags_obj[diff2[i]]['ids'].length > 0) {
           diff2.splice(i, 1);
+	} else {
+          //remove it from the datalists
+          datalist.removeChild(document.getElementById('all,' + diff2[i]));
+          removeTagsFromDatalist([diff2[i]]);
         }
       }
-      console.log(diff2);
       //diff two now contains tags with no ids, so remove them
       tags_obj = await getData('delete_entry.py', 'POST', {tags: diff2});
     }
@@ -424,7 +447,7 @@ function removeTagsFromDatalist(tags) {
   const datalist = document.getElementById('tags-datalist');
   for(let i = 0; i < tags.length; i++) {
     const opt = document.getElementById('opt,' + tags[i]);
-    if(opt !== undefined) {
+    if(opt !== null) {
       datalist.removeChild(opt);
     }
   }
