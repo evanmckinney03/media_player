@@ -64,6 +64,15 @@
   font-size: 16px;
 }
 
+.search-item {
+  background-color: lightskyblue;
+  font-family: Lucida Console, monospace;
+  padding: 2px;
+  border: 1px, solid, black;
+  border-radius: 7px;
+  font-size: 14px;
+}
+
 .tag-padding {
   padding-left: 0.65em;
   padding-right: 0.65em;
@@ -76,6 +85,10 @@
 #tag-list {
   flex-wrap: wrap;
   align-items: center;
+}
+
+#search-list {
+  margin: 0px;
 }
 
 #tag-label {

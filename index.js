@@ -397,6 +397,7 @@ function addToSearchList(value) {
   const searchList = document.getElementById('search-list');
   const item = document.createElement('span');
   item.setAttribute('id', 'sl,' + value + ', ');
+  item.setAttribute('class', 'search-item');
   item.innerHTML = value;
   searchList.appendChild(item);
   for(let i = elemsToSearch.length - 1; i >= 0; i--) {
