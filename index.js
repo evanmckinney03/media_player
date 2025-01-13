@@ -79,6 +79,13 @@ function init() {
     }
   });
 
+  const searchButton = document.getElementById('search-glass');
+  searchButton.addEventListener('click', function(e) {
+    clearSearchButton.classList.remove('removed');
+    addToSearchList(searchInput.value);
+    searchInput.value = '';
+  });
+
   const updateThumbnailButton = document.getElementById('update-thumbnail-button');
   updateThumbnailButton.addEventListener('click', function() {
     this.disabled = true;
@@ -397,6 +404,7 @@ function addToSearchList(value) {
   const searchList = document.getElementById('search-list');
   const item = document.createElement('span');
   item.setAttribute('id', 'sl,' + value + ', ');
+  item.setAttribute('class', 'search-item');
   item.innerHTML = value;
   searchList.appendChild(item);
   for(let i = elemsToSearch.length - 1; i >= 0; i--) {
