@@ -79,6 +79,13 @@ function init() {
     }
   });
 
+  const searchButton = document.getElementById('search-glass');
+  searchButton.addEventListener('click', function(e) {
+    clearSearchButton.classList.remove('removed');
+    addToSearchList(searchInput.value);
+    searchInput.value = '';
+  });
+
   const updateThumbnailButton = document.getElementById('update-thumbnail-button');
   updateThumbnailButton.addEventListener('click', function() {
     this.disabled = true;
