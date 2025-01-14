@@ -2,3 +2,6 @@
 *.mp4
 *.json
 *.jpg
+
+!demo/videos/*.mp4
+!demo/json/*.json
