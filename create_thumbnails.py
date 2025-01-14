@@ -3,10 +3,33 @@ import cv2
 global numbers
 import numbers
 import os
+global math
+import math
 
 success = True
 location = 'json/ids.json'
 message = ''
+
+def resize(image):
+    height = image.shape[0]
+    width = image.shape[1]
+    if(height == 1080 and width == 1920):
+        return image
+    scale = 1080 / height if height > width else 1920 / width
+    new_image = cv2.resize(image, None, fx= scale, fy=scale, interpolation = cv2.INTER_CUBIC)
+    new_height = new_image.shape[0]
+    new_width = new_image.shape[1]
+    if(new_height > new_width):
+        #need to add black bars to left and right
+        left = math.ceil((1920 - new_width) / 2);
+        right = math.floor((1920 - new_width) / 2);
+        return cv2.copyMakeBorder(new_image, 0, 0, left, right, cv2.BORDER_CONSTANT, value = [0, 0, 0])
+    else:
+        #need to add black bars to top and bottom
+        top = math.ceil((1080 - new_height) / 2);
+        bottom = math.floor((1080 - new_height) / 2);
+        return cv2.copyMakeBorder(new_image, top, bottom, 0, 0, cv2.BORDER_CONSTANT, value = [0, 0, 0])
+
 try:
     times = None
     try:
@@ -37,17 +60,18 @@ try:
             pass
         try:
             cam = cv2.VideoCapture('videos/' + i)
-            cam.set(cv2.CAP_PROP_POS_MSEC, time)
+            cam.set(cv2.CAP_PROP_POS_MSEC, int(time))
             success, frame = cam.read()
             url = 'thumbnails/' + i.split('.')[0] + '-' + str(int(cam.get(cv2.CAP_PROP_POS_FRAMES))) + '.jpg'
-            cv2.imwrite(url, frame)
+            image = resize(frame)
+            cv2.imwrite(url, image)
             cam.release()
             #delete the old thumbnail
             old_url = current_ids[i]['thumbnail-url']
-            if(os.path.exists(old_url)):
+            if(os.path.exists(old_url) and old_url != url):
                 os.remove(old_url)
             current_ids[i]['thumbnail-url'] = url
-        except:
+        except Exception as e:
             message += 'Unable to generate thumbnail for id ' + i + '\n'
             success = False
     cv2.destroyAllWindows()
