@@ -60,18 +60,24 @@ try:
             pass
         try:
             cam = cv2.VideoCapture('videos/' + i)
-            cam.set(cv2.CAP_PROP_POS_MSEC, int(time))
+            old_url = current_ids[i]['thumbnail-url']
+            if(len(old_url) > 0):
+                #there is a url, but something happened to the thumbnail
+                #split by - then get rid of file extenstion
+                cam.set(cv2.CAP_PROP_POS_FRAMES, int(old_url.split('-')[1][:-4]))
+            else:
+                cam.set(cv2.CAP_PROP_POS_MSEC, int(time))
             success, frame = cam.read()
             url = 'thumbnails/' + i.split('.')[0] + '-' + str(int(cam.get(cv2.CAP_PROP_POS_FRAMES))) + '.jpg'
             image = resize(frame)
             cv2.imwrite(url, image)
             cam.release()
             #delete the old thumbnail
-            old_url = current_ids[i]['thumbnail-url']
             if(os.path.exists(old_url) and old_url != url):
                 os.remove(old_url)
             current_ids[i]['thumbnail-url'] = url
         except Exception as e:
+            print(e)
             message += 'Unable to generate thumbnail for id ' + i + '\n'
             success = False
     cv2.destroyAllWindows()
