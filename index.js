@@ -96,16 +96,11 @@ function init() {
 }
 
 async function displayFirstAndThumbnails(){
-  try {
-    const json = await getData('json/ids.json', 'GET');
-    ids_obj = json;
-  } catch {
-    //error getting ids.json, meaning it does not exist
-    await getData('create_ids.py', 'POST');
-    //also generate thumbnails for the videos
-    const json = await getData('create_thumbnails.py', 'POST');
-    ids_obj = json;
-  }
+  //on startup, create_ids to check if any new videos were added
+  await getData('create_ids.py', 'POST');
+  //also generate thumbnails for the videos
+  const json = await getData('create_thumbnails.py', 'POST');
+  ids_obj = json;
   await getTags();
   const ids = Object.keys(ids_obj);
   displayVideo(ids[0], ids_obj[ids[0]]['title']);

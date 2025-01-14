@@ -15,7 +15,7 @@
 
 #about-div {
   background-color: lightBlue;
-  width: 30%;
+  width: 40%;
   height: stretch;
 }
 
@@ -30,7 +30,9 @@
 }
 
 #video {
-  max-width: 70%;
+  max-width: 60%;
+  min-width: 60%;
+  max-height: 70vh;
 }
 
 .thumbnail-text {
