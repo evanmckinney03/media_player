@@ -30,6 +30,7 @@ except:
 
 #get all the files currently in videos
 files = os.listdir('videos')
+os.makedirs('json', exist_ok=True)
 
 #remove from files ids that are in current_ids
 if(len(current_ids) > 0):
@@ -40,7 +41,7 @@ if(len(current_ids) > 0):
 for f in files:
     new_name = generate_id() + '.' + f.split('.')[-1]
     #add the file extenstion as well
-    current_ids[new_name] = {'title': f.split('.')[:-1], 'tags': [], 'thumbnail-url': ''};
+    current_ids[new_name] = {'title': os.path.splitext(f)[0], 'tags': [], 'thumbnail-url': ''};
     #also rename the file in ../videos
     os.rename('videos/' + f, 'videos/' + new_name)
 
