@@ -43,9 +43,11 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
             super().do_GET()
     def do_POST(self):
         #first need to look at the self.path
-        #remove the leading /, and split off query
+        #split off query
         split = self.path.split('?')
-        path = split[0][1:]
+        path = split[0]
+        #add the scripts and the .py
+        path = 'scripts' + path + '.py'
         query = '';
         if(len(split) > 1):
             query = split[1] 
