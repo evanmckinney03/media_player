@@ -93,6 +93,9 @@ function init() {
       updateThumbnailButton.disabled = false;
     })
   });
+
+  const deleteVidButton = document.getElementById('delete-video-button');
+  deleteVidButton.addEventListener('click', deleteVideoClicked);
 }
 
 async function displayFirstAndThumbnails(){
@@ -103,7 +106,7 @@ async function displayFirstAndThumbnails(){
   ids_obj = json;
   await getTags();
   const ids = Object.keys(ids_obj);
-  displayVideo(ids[0], ids_obj[ids[0]]['title']);
+  displayVideo(ids[0]);
   for(let i = 0; i < ids.length; i++) {
     await createThumbnail(ids[i], ids_obj[ids[i]]['title']);
   }
@@ -149,7 +152,7 @@ async function createThumbnail(id, title) {
     const id = this.parentNode.getAttribute('id');
     const currentId = getCurrentId();
     if(id != currentId) {
-      displayVideo(id, title);
+      displayVideo(id);
     }
   });
   const div = document.createElement('div');
@@ -181,7 +184,8 @@ async function getTags() {
 }
 
 //given the id, put it into the video player
-function displayVideo(id, title) {
+function displayVideo(id) {
+  const title = ids_obj[id]['title'];
   const video = document.getElementById('video');
   let src = document.getElementById('src');
   const url = 'videos/' + id;
@@ -192,7 +196,7 @@ function displayVideo(id, title) {
     video.appendChild(src);
     addTagsToDatalist();
   } else {
-    addTagsToDatalist(ids_obj[src.getAttribute('src').slice('videos/'.length)]['tags']);
+    addTagsToDatalist(ids_obj[id]['tags']);
   }
   src.setAttribute('src', 'videos/' + id);
   const titleElem = document.getElementById('title');
@@ -453,5 +457,20 @@ function removeTagsFromDatalist(tags) {
     if(opt !== null) {
       datalist.removeChild(opt);
     }
+  }
+}
+
+//first confirms if user wants to delete the video, then sends a request
+//to server to delete the video
+async function deleteVideoClicked() {
+  if(confirm('Are you sure you want to delete the video?') == true) {
+    //delete the thumbnail and switch video to the first one
+    const id = getCurrentId();
+    const thumbnail = document.getElementById(id);
+    thumbnail.parentNode.removeChild(thumbnail);
+    //get video removed from server
+    ids_obj = await getData('delete_entry.py', 'POST', {ids: id});
+    displayVideo(Object.keys(ids_obj)[0]);
+    await getTags();
   }
 }
