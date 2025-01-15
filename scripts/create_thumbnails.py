@@ -54,21 +54,24 @@ try:
         ids = [i + '.mp4' for i in temp_ids if i not in thumbnails]
     for idx, i in enumerate(ids):
         time = 0
+        time_passed = False;
         try:
             time = times[idx]
+            time_passed = True;
         except:
             pass
         try:
             cam = cv2.VideoCapture('videos/' + i)
             old_url = current_ids[i]['thumbnail-url']
-            if(len(old_url) > 0):
+            if(not time_passed and len(old_url) > 0):
                 #there is a url, but something happened to the thumbnail
                 #split by - then get rid of file extenstion
-                cam.set(cv2.CAP_PROP_POS_FRAMES, int(old_url.split('-')[1][:-4]))
+                cam.set(cv2.CAP_PROP_POS_FRAMES, int(old_url.split('-')[-1][:-4]))
             else:
                 cam.set(cv2.CAP_PROP_POS_MSEC, int(time))
             success, frame = cam.read()
-            url = 'thumbnails/' + i.split('.')[0] + '-' + str(int(cam.get(cv2.CAP_PROP_POS_FRAMES))) + '.jpg'
+            #subtract one because cam.read() increments frame count by one
+            url = 'thumbnails/' + i.split('.')[0] + '-' + str(int(cam.get(cv2.CAP_PROP_POS_FRAMES)) - 1) + '.jpg'
             image = resize(frame)
             cv2.imwrite(url, image)
             cam.release()

@@ -100,9 +100,9 @@ function init() {
 
 async function displayFirstAndThumbnails(){
   //on startup, create_ids to check if any new videos were added
-  await getData('create_ids.py', 'POST');
+  await getData('create_ids', 'POST');
   //also generate thumbnails for the videos
-  const json = await getData('create_thumbnails.py', 'POST');
+  const json = await getData('create_thumbnails', 'POST');
   ids_obj = json;
   await getTags();
   const ids = Object.keys(ids_obj);
@@ -136,7 +136,7 @@ async function editTitle() {
     div.firstElementChild.innerHTML = newTitle;
 
     //make a post request to edit title on server
-    ids_obj = await getData('edit_ids.py', 'POST', {id: id, title: newTitle});
+    ids_obj = await getData('edit_ids', 'POST', {id: id, title: newTitle});
   }
 }
 
@@ -326,7 +326,7 @@ async function sendTags() {
     //if a tag is being removed, dont also send it
     const diff1 = tagsToSend.filter(x => !tagsToRemove.includes(x));
     if(diff1.length > 0) {
-      ids_obj = await getData('add_tags.py', 'POST', {id: id, tags: diff1});
+      ids_obj = await getData('add_tags', 'POST', {id: id, tags: diff1});
       await getTags();
       //add to all tags datalist
       for(let i = 0; i < diff1.length; i++) {
@@ -341,7 +341,7 @@ async function sendTags() {
     //if a tag was added then removed, dont need to remove it still
     const diff2 = tagsToRemove.filter(x => !tagsToSend.includes(x));
     if(diff2.length > 0) {
-      ids_obj = await getData('remove_tags.py', 'POST', {id: id, tags: diff2});
+      ids_obj = await getData('remove_tags', 'POST', {id: id, tags: diff2});
       await getTags();
       //diff two contains the tags that were removed
       for(let i = diff2.length - 1; i >= 0; i--) {
@@ -353,8 +353,10 @@ async function sendTags() {
           removeTagsFromDatalist([diff2[i]]);
         }
       }
-      //diff two now contains tags with no ids, so remove them
-      tags_obj = await getData('delete_entry.py', 'POST', {tags: diff2});
+      if(diff2.length > 0) {
+        //diff two now contains tags with no ids, so remove them
+        tags_obj = await getData('delete_entry', 'POST', {tags: diff2});
+      }
     }
   } catch ({name, message}){
     console.error('Unable to send tags to server');
@@ -431,7 +433,7 @@ async function updateThumbnail() {
   const timestamp = 1000 * video.currentTime;
   const id = getCurrentId();
   //should probably be in a try catch
-  ids_obj = await getData('create_thumbnails.py', 'POST', {ids: id, timestamps: timestamp});
+  ids_obj = await getData('create_thumbnails', 'POST', {ids: id, timestamps: timestamp});
   //change the thumbnail img url to the new one
   const img = document.getElementById(id).querySelector('img');
   img.src = ids_obj[id]['thumbnail-url'];
@@ -469,7 +471,7 @@ async function deleteVideoClicked() {
     const thumbnail = document.getElementById(id);
     thumbnail.parentNode.removeChild(thumbnail);
     //get video removed from server
-    ids_obj = await getData('delete_entry.py', 'POST', {ids: id});
+    ids_obj = await getData('delete_entry', 'POST', {ids: id});
     displayVideo(Object.keys(ids_obj)[0]);
     await getTags();
   }
