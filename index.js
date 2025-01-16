@@ -7,6 +7,7 @@ window.onload = init()
 function init() {
   displayFirstAndThumbnails();
   //add an event listener to the edit button to make the title editable
+  /*
   const editTitleButton = document.getElementById('edit-title-button');
   editTitleButton.addEventListener('click', function() {
     const titleElem = document.getElementById('title');
@@ -24,6 +25,7 @@ function init() {
       this.blur();
     }
   });
+  */
   const editTagButton = document.getElementById('edit-tag-button');
   const tagMenu = document.getElementById('tag-menu-div');
   editTagButton.addEventListener('click', function() {
@@ -96,6 +98,16 @@ function init() {
 
   const deleteVidButton = document.getElementById('delete-video-button');
   deleteVidButton.addEventListener('click', deleteVideoClicked);
+
+  const dropdownButton = document.getElementById('dropdown-button');
+  const dropdown = document.getElementById('about-dropdown');
+  dropdownButton.addEventListener('click', function(e) {
+    if(dropdown.classList.contains('removed')) {
+      hideOnOutsideClick(dropdown);
+      e.stopPropagation();
+      dropdown.classList.remove('removed');
+    }
+  });
 }
 
 async function displayFirstAndThumbnails(){
@@ -475,4 +487,20 @@ async function deleteVideoClicked() {
     displayVideo(Object.keys(ids_obj)[0]);
     await getTags();
   }
+}
+
+//hides the given element when clicked outside of it
+function hideOnOutsideClick(e) {
+  const outsideClickerListener = (event) => {
+    if(!e.contains(event.target)) {
+      e.classList.add('removed');
+      removeClickListener();
+    }
+  };
+
+  const removeClickListener = () => {
+    document.removeEventListener('click', outsideClickerListener);
+  };
+
+  document.addEventListener('click', outsideClickerListener);
 }
