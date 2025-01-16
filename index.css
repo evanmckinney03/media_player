@@ -113,9 +113,10 @@
   z-index: 1;
 }
 
-.dropdown-content a {
+.dropdown-content p {
   color: black;
   padding: 12px 16px;
+  margin: 0px;
   text-decoration: none;
   display: block;
 }

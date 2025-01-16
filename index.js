@@ -7,12 +7,13 @@ window.onload = init()
 function init() {
   displayFirstAndThumbnails();
   //add an event listener to the edit button to make the title editable
-  /*
   const editTitleButton = document.getElementById('edit-title-button');
   editTitleButton.addEventListener('click', function() {
     const titleElem = document.getElementById('title');
     //set focus to titleElem
     titleElem.focus();
+    document.getElementById('about-dropdown').classList.add('removed');
+    removeClickListener();
     titleElem.removeAttribute('readonly');
     title.addEventListener('blur', editTitle, {once: true});
   });
@@ -25,7 +26,6 @@ function init() {
       this.blur();
     }
   });
-  */
   const editTagButton = document.getElementById('edit-tag-button');
   const tagMenu = document.getElementById('tag-menu-div');
   editTagButton.addEventListener('click', function() {
@@ -478,6 +478,8 @@ function removeTagsFromDatalist(tags) {
 //to server to delete the video
 async function deleteVideoClicked() {
   if(confirm('Are you sure you want to delete the video?') == true) {
+    document.getElementById('about-dropdown').classList.add('removed');
+    removeClickListener();
     //delete the thumbnail and switch video to the first one
     const id = getCurrentId();
     const thumbnail = document.getElementById(id);
@@ -490,17 +492,20 @@ async function deleteVideoClicked() {
 }
 
 //hides the given element when clicked outside of it
+//made into own functions so that removeClickListener can be called elsewhere
+let outsideClickerListener;
 function hideOnOutsideClick(e) {
-  const outsideClickerListener = (event) => {
+  outsideClickerListener = (event) => {
     if(!e.contains(event.target)) {
       e.classList.add('removed');
       removeClickListener();
     }
-  };
-
-  const removeClickListener = () => {
-    document.removeEventListener('click', outsideClickerListener);
-  };
+    
+  }
 
   document.addEventListener('click', outsideClickerListener);
+}
+
+function removeClickListener() {
+  document.removeEventListener('click', outsideClickerListener);
 }
