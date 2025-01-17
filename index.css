@@ -20,13 +20,17 @@
 }
 
 .thumbnail {
-  max-width: 33%;
-  min-width: 33%;
+  max-width: 33.33%;
+  min-width: 33.33%;
+  position: relative;
 }
 
 .thumbnail-img {
-  max-width: 100%;
-  min-width: 100%;
+  max-width: 95%;
+  min-width: 95%;
+  margin: 2%;
+  border: 2px white solid;
+  border-radius: 8px;
 }
 
 #video {
@@ -36,7 +40,14 @@
 }
 
 .thumbnail-text {
-  margin: 0px;
+  position: absolute;
+  margin: 4%;
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 20px;
+  background-color: #414141cc;
+  color: white;
+  padding: 2px;
+  border-radius: 4px;
 }
 
 #title {
