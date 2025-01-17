@@ -24,11 +24,12 @@
         <div id="tags-div" class="flex-column">
 	  <p id="tag-label">Tags:</p>
 	  <div id="tag-list" class="flex-grid">
-	    <span class="material-icons" id="edit-tag-button">edit</span>
+	    <span class="material-icons" id="edit-tag-button">add</span>
 	  </div>
         </div>
-        <div id="tag-menu-div" class="removed"> 
-          <input type="text" list="tags-datalist" id="tag-input" autocomplete="off">
+        <div id="tag-menu-div" class="removed flex-grid"> 
+          <input type="text" list="tags-datalist" id="tag-input" autocomplete="off" placeholder="Enter a tag to add...">
+	  <span class="material-icons" id="add-tag-button">add</span>
 	  <datalist id="tags-datalist">
           </datalist>
         </div>

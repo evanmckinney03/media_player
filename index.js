@@ -30,8 +30,10 @@ function init() {
   const tagMenu = document.getElementById('tag-menu-div');
   editTagButton.addEventListener('click', function() {
     if(tagMenu.classList.contains('removed')) {
+      this.innerHTML = 'check';
       editTagClicked();
     } else {
+      this.innerHTML = 'add';
       doneTagsClicked();
     }
   });
@@ -45,6 +47,14 @@ function init() {
       }
     }
   });
+  const addTagButton = document.getElementById('add-tag-button');
+  addTagButton.addEventListener('click', function(e) {
+    if(tagInputField.value !== '') {
+      addTag(tagInputField.value);
+      tagInputField.value = '';
+    }
+  });
+
   
   const searchBy = document.getElementById('search-by');
   const searchInput = document.getElementById('search-input');
