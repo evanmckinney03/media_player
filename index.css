@@ -1,3 +1,6 @@
+body {
+  background-color: #343434;
+}
 
 .flex-grid {
   display: flex;
@@ -9,14 +12,16 @@
 }
 
 #thumbnails-div {
-  background-color: yellow;
+  background-color: #585858;
   flex-wrap: wrap;
+  border-radius: 8px;
 }
 
 #about-div {
-  background-color: lightBlue;
+  background-color: #585858;
   width: 40%;
   height: stretch;
+  border-radius: 8px;
 }
 
 .thumbnail {
@@ -37,6 +42,8 @@
   max-width: 60%;
   min-width: 60%;
   max-height: 70vh;
+  margin-right: 3px;
+  border-radius: 8px;
 }
 
 .thumbnail-text {
@@ -45,7 +52,7 @@
   font-family: Verdana, Arial, sans-serif;
   font-size: 20px;
   background-color: #414141cc;
-  color: white;
+  color: #cfcfcf;
   padding: 2px;
   border-radius: 4px;
 }
@@ -59,6 +66,7 @@
   font-size: 30px;
   min-width: 0;
   resize: none;
+  color: #cfcfcf;
 }
 #title-div {
   align-items: start;
@@ -72,6 +80,8 @@
   background-color: lightgrey;
   font-family: Lucida Console, monospace;
   padding: 2px;
+  margin: 2px;
+  padding-top: 4px;
   border: 2px, solid, black;
   border-radius: 10px;
   font-size: 16px;
@@ -127,16 +137,26 @@
 
 #search-glass {
   font-size: 30px;
+  color: #cfcfcf;
 }
 
 #tag-label {
   font-family: Verdana, Arial, sans-serif;
   margin-bottom: 2px;
   font-size: 18px;
+  color: #cfcfcf;
 }
 
 #about-div {
   padding: 5px;
+}
+
+#dropdown-button {
+  color: #cfcfcf;
+}
+
+#edit-tag-button {
+  color: #cfcfcf;
 }
 
 .dropdown-content {
@@ -147,6 +167,8 @@
   min-width: 160px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .dropdown-content p, .dropdown-content input {
