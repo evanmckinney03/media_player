@@ -81,6 +81,7 @@
   background-color: lightskyblue;
   font-family: Lucida Console, monospace;
   padding: 2px;
+  margin: 2px;
   border: 1px, solid, black;
   border-radius: 7px;
   font-size: 14px;
@@ -100,8 +101,32 @@
   align-items: center;
 }
 
+#search-div {
+  justify-content: center;
+  margin: 5px;
+}
+
 #search-list {
   margin: 0px;
+}
+
+#search-by {
+  margin: 2px;
+  border: 2px black solid;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+#search-input {
+  margin: 2px;
+  min-width: 200px;
+  border: 2px black solid;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+#search-glass {
+  font-size: 30px;
 }
 
 #tag-label {
@@ -111,7 +136,7 @@
 }
 
 #about-div {
-  margin: 5px;
+  padding: 5px;
 }
 
 .dropdown-content {
