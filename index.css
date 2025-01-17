@@ -136,3 +136,5 @@
   border: none;
 }
 
+.dropdown-content p:hover {background-color: #a8a8a8}
+.dropdown-content input:hover {background-color: #a8a8a8}
