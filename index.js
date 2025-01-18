@@ -121,8 +121,11 @@ function init() {
     }
   });
   
-  let lightMode = false;
+  let lightMode = !(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
   const lightModeButton = document.getElementById('light-mode-button');
+  if(lightMode) {
+    lightModeButton.innerHTML = 'dark_mode';
+  }
   lightModeButton.addEventListener('click', function(e) {
     if(lightMode) {
       this.innerHTML = 'light_mode';
