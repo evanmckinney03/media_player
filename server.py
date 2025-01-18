@@ -1,6 +1,7 @@
 import http.server
 import os
 import json
+import importlib
 
 class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -45,9 +46,9 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
         #first need to look at the self.path
         #split off query
         split = self.path.split('?')
-        path = split[0]
+        path = split[0][1:]
         #add the scripts and the .py
-        path = 'scripts' + path + '.py'
+        path = 'scripts.' + path
         query = '';
         if(len(split) > 1):
             query = split[1] 
@@ -63,25 +64,24 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
             body = {};
         #try to run the file in the given url
         try:
-            exec_loc = {'body': body, 'query': query}
-            with open(path, 'r') as file:
-                exec(file.read(), globals(), exec_loc)
-            #the given script will create locals 'location' and 'success' and 'message'
-            if(exec_loc['success']):
+            script = importlib.import_module(path);
+            #the given script will return 'success', 'location', and 'message'
+            success, location, message = script.execute(body, query)
+            if(success):
                 self.send_response(201)
-                self.send_header('Location', exec_loc['location'])
+                self.send_header('Location', location)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 #also send back the json file it wrote to
-                with open(exec_loc['location'], 'r') as file:
+                with open(location, 'r') as file:
                     self.wfile.write(bytes(file.read(), 'utf8'))
             else:
                 self.send_response(400)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
 
-                self.wfile.write(bytes(exec_loc['message'], 'utf8'))
-        except FileNotFoundError:
+                self.wfile.write(bytes(message, 'utf8'))
+        except ModuleNotFoundError:
             #send back an error
             self.send_response(404)
             self.send_header('Location', path)

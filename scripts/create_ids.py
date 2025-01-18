@@ -15,40 +15,43 @@ def generate_id():
     hash_obj = hashlib.sha256(string.encode())
     return hash_obj.hexdigest()
 
-#location that the json file is at
-location = 'json/ids.json'
 
-current_ids = {}
-#try to open json/ids.json
-try:
-    with open(location, 'r+') as file:
-        #set current_ids to be the stuff in ids.json
-        current_ids = json.loads(file.read())
-except:
-    #if the file does not exist, then current_ids should be empty
-    pass
+def execute(body, query):
+    #location that the json file is at
+    location = 'json/ids.json'
 
-#get all the files currently in videos
-files = os.listdir('videos')
-os.makedirs('json', exist_ok=True)
+    current_ids = {}
+    #try to open json/ids.json
+    try:
+        with open(location, 'r+') as file:
+            #set current_ids to be the stuff in ids.json
+            current_ids = json.loads(file.read())
+    except:
+        #if the file does not exist, then current_ids should be empty
+        pass
 
-#remove from files ids that are in current_ids
-if(len(current_ids) > 0):
-  ids_set = set(current_ids.keys())
-  files[:] = [x for x in files if x not in ids_set]
+    #get all the files currently in videos
+    files = os.listdir('videos')
+    os.makedirs('json', exist_ok=True)
 
-#now files contains the list of videos that needs a unique id
-for f in files:
-    new_name = generate_id() + '.' + f.split('.')[-1]
-    #add the file extenstion as well
-    current_ids[new_name] = {'title': os.path.splitext(f)[0], 'tags': [], 'thumbnail-url': ''};
-    #also rename the file in ../videos
-    os.rename('videos/' + f, 'videos/' + new_name)
+    #remove from files ids that are in current_ids
+    if(len(current_ids) > 0):
+        ids_set = set(current_ids.keys())
+        files[:] = [x for x in files if x not in ids_set]
 
-#now current_ids contains all the unique id to old file names
-with open(location, 'w+') as file:
-    file.seek(0)
-    json.dump(current_ids, file)
+    #now files contains the list of videos that needs a unique id
+    for f in files:
+        new_name = generate_id() + '.' + f.split('.')[-1]
+        #add the file extenstion as well
+        current_ids[new_name] = {'title': os.path.splitext(f)[0], 'tags': [], 'thumbnail-url': ''};
+        #also rename the file in ../videos
+        os.rename('videos/' + f, 'videos/' + new_name)
 
-success = True
-message = 'hello'
+    #now current_ids contains all the unique id to old file names
+    with open(location, 'w+') as file:
+        file.seek(0)
+        json.dump(current_ids, file)
+    
+    success = True
+    message = 'hello'
+    return success, location, message

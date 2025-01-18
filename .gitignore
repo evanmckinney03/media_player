@@ -3,5 +3,7 @@
 *.json
 *.jpg
 
+scripts/__pycache__
+
 !demo/videos/*.mp4
 !demo/json/*.json
