@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Testing Fetch API</title>
+  <title>Personal Media Player</title>
   <link rel="stylesheet" href="index.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
@@ -11,24 +11,29 @@
       <video controls id="video"></video>
       <div id="about-div">
         <div id="title-div" class="flex-grid">
-	  <textarea id="title" rows="1"></textarea>
-          <span class="material-icons" id="edit-title-button">edit</span>
+	  <textarea id="title" rows="1" class="text-color"></textarea>
+	  <div class="dropdown">
+            <span class="material-icons text-color no-highlight" id="dropdown-button">more_vert</span>
+	    <div id="about-dropdown" class="dropdown-content removed">
+	      <p id="edit-title-button" title="Change the title of the video">Edit Title</p>
+              <input type="button" id="update-thumbnail-button" title="Change the thumbnail of this video to the image at the time currently shown" value="Update Thumbnail">
+              <p id="delete-video-button" title="Remove this video from the list of videos">Delete Video</p>
+	    </div>
+	  </div>
 	</div>
         <div id="tags-div" class="flex-column">
-	  <p id="tag-label">Tags:</p>
+	  <p id="tag-label" class="text-color">Tags:</p>
 	  <div id="tag-list" class="flex-grid">
-	    <span class="material-icons" id="edit-tag-button">edit</span>
+	    <span class="material-icons text-color no-highlight" id="edit-tag-button">add</span>
 	  </div>
         </div>
-        <div id="tag-menu-div" class="removed"> 
-          <input type="text" list="tags-datalist" id="tag-input" autocomplete="off">
+        <div id="tag-menu-div" class="removed flex-grid"> 
+          <input type="text" list="tags-datalist" id="tag-input" autocomplete="off" placeholder="Enter a tag to add...">
+	  <span class="material-icons" id="add-tag-button">add</span>
 	  <datalist id="tags-datalist">
           </datalist>
         </div>
-	<div id="thumbnail-controller-div">
-          <input type="button" value="Update Thumbnail" id="update-thumbnail-button">
-	  <input type="button" value="Delete Video" id="delete-video-button">
-	</div>
+	<span class="material-icons text-color no-highlight" id="light-mode-button">light_mode</span>
       </div>
     </div>
     <div id="search-div" class="flex-grid">
@@ -37,9 +42,9 @@
         <option value="tag">Tag</option>
       </select>
       <input type="text" id="search-input" autocomplete="off" placeholder="Search...">
-      <span class="material-icons" id="search-glass">search</span>
-      <p id="search-list"></p>
-      <span class="material-icons removed" id="clear-search-button">delete</span>
+      <span class="material-icons text-color large-icon no-highlight" id="search-glass">search</span>
+      <div id="search-list" class="flex-grid"></div>
+      <span class="material-icons removed text-color large-icon" id="clear-search-button">delete</span>
       <datalist id="all-tags-datalist">
       </datalist>
     </div>

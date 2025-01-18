@@ -12,6 +12,8 @@ function init() {
     const titleElem = document.getElementById('title');
     //set focus to titleElem
     titleElem.focus();
+    document.getElementById('about-dropdown').classList.add('removed');
+    removeClickListener();
     titleElem.removeAttribute('readonly');
     title.addEventListener('blur', editTitle, {once: true});
   });
@@ -28,8 +30,10 @@ function init() {
   const tagMenu = document.getElementById('tag-menu-div');
   editTagButton.addEventListener('click', function() {
     if(tagMenu.classList.contains('removed')) {
+      this.innerHTML = 'check';
       editTagClicked();
     } else {
+      this.innerHTML = 'add';
       doneTagsClicked();
     }
   });
@@ -43,6 +47,14 @@ function init() {
       }
     }
   });
+  const addTagButton = document.getElementById('add-tag-button');
+  addTagButton.addEventListener('click', function(e) {
+    if(tagInputField.value !== '') {
+      addTag(tagInputField.value);
+      tagInputField.value = '';
+    }
+  });
+
   
   const searchBy = document.getElementById('search-by');
   const searchInput = document.getElementById('search-input');
@@ -72,7 +84,7 @@ function init() {
   });
 
   searchInput.addEventListener('keypress', function(event) {
-    if(event.key == 'Enter') { 
+    if(event.key == 'Enter' && this.value !== '') { 
       clearSearchButton.classList.remove('removed');
       addToSearchList(this.value);
       this.value = '';
@@ -81,9 +93,11 @@ function init() {
 
   const searchButton = document.getElementById('search-glass');
   searchButton.addEventListener('click', function(e) {
-    clearSearchButton.classList.remove('removed');
-    addToSearchList(searchInput.value);
-    searchInput.value = '';
+    if(searchInput.value !== '') {
+      clearSearchButton.classList.remove('removed');
+      addToSearchList(searchInput.value);
+      searchInput.value = '';
+    }
   });
 
   const updateThumbnailButton = document.getElementById('update-thumbnail-button');
@@ -96,6 +110,33 @@ function init() {
 
   const deleteVidButton = document.getElementById('delete-video-button');
   deleteVidButton.addEventListener('click', deleteVideoClicked);
+
+  const dropdownButton = document.getElementById('dropdown-button');
+  const dropdown = document.getElementById('about-dropdown');
+  dropdownButton.addEventListener('click', function(e) {
+    if(dropdown.classList.contains('removed')) {
+      hideOnOutsideClick(dropdown);
+      e.stopPropagation();
+      dropdown.classList.remove('removed');
+    }
+  });
+  
+  let lightMode = !(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const lightModeButton = document.getElementById('light-mode-button');
+  if(lightMode) {
+    lightModeButton.innerHTML = 'dark_mode';
+  }
+  lightModeButton.addEventListener('click', function(e) {
+    if(lightMode) {
+      this.innerHTML = 'light_mode';
+      lightMode = false;
+      document.documentElement.style.setProperty('color-scheme', 'dark');
+    } else {
+      this.innerHTML = 'dark_mode';
+      lightMode = true;
+      document.documentElement.style.setProperty('color-scheme', 'light');
+    }
+  });
 }
 
 async function displayFirstAndThumbnails(){
@@ -466,6 +507,8 @@ function removeTagsFromDatalist(tags) {
 //to server to delete the video
 async function deleteVideoClicked() {
   if(confirm('Are you sure you want to delete the video?') == true) {
+    document.getElementById('about-dropdown').classList.add('removed');
+    removeClickListener();
     //delete the thumbnail and switch video to the first one
     const id = getCurrentId();
     const thumbnail = document.getElementById(id);
@@ -475,4 +518,23 @@ async function deleteVideoClicked() {
     displayVideo(Object.keys(ids_obj)[0]);
     await getTags();
   }
+}
+
+//hides the given element when clicked outside of it
+//made into own functions so that removeClickListener can be called elsewhere
+let outsideClickerListener;
+function hideOnOutsideClick(e) {
+  outsideClickerListener = (event) => {
+    if(!e.contains(event.target)) {
+      e.classList.add('removed');
+      removeClickListener();
+    }
+    
+  }
+
+  document.addEventListener('click', outsideClickerListener);
+}
+
+function removeClickListener() {
+  document.removeEventListener('click', outsideClickerListener);
 }
