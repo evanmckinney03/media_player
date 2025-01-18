@@ -118,6 +118,20 @@ function init() {
       dropdown.classList.remove('removed');
     }
   });
+  
+  let lightMode = false;
+  const lightModeButton = document.getElementById('light-mode-button');
+  lightModeButton.addEventListener('click', function(e) {
+    if(lightMode) {
+      this.innerHTML = 'light_mode';
+      lightMode = false;
+      document.documentElement.style.setProperty('color-scheme', 'dark');
+    } else {
+      this.innerHTML = 'dark_mode';
+      lightMode = true;
+      document.documentElement.style.setProperty('color-scheme', 'light');
+    }
+  });
 }
 
 async function displayFirstAndThumbnails(){

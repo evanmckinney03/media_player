@@ -28,6 +28,10 @@ body {
   color: light-dark(black, #cfcfcf);
 }
 
+.no-highlight {
+  user-select: none;
+}
+
 
 #about-div {
   background-color: var(--div-background);
@@ -35,6 +39,7 @@ body {
   height: stretch;
   border-radius: 8px;
   padding: 5px;
+  position: relative;
 }
 
 #video {
@@ -61,7 +66,7 @@ body {
 }
 
 .tag {
-  background-color: lightgrey;
+  background-color: light-dark(#959595, lightgrey);
   font-family: Lucida Console, monospace;
   padding: 2px;
   margin: 2px;
@@ -90,6 +95,13 @@ body {
 #tag-list {
   flex-wrap: wrap;
   align-items: center;
+}
+
+#light-mode-button {
+  position: absolute;
+  right: 0%;
+  bottom: 0%;
+  padding: 5px;
 }
 
 
