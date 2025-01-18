@@ -166,7 +166,6 @@ async function createThumbnail(id, title) {
   const text = document.createElement('p');
   text.innerHTML = title;
   text.setAttribute('class', 'thumbnail-text');
-  text.classList.add('white-text');
   const img = document.createElement('img');
   img.setAttribute('src', ids_obj[id]['thumbnail-url']);
   img.setAttribute('class', 'thumbnail-img');

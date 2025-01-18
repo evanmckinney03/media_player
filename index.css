@@ -1,5 +1,10 @@
+html {
+  color-scheme: light dark;
+  --div-background: light-dark(#d2d2d2, #585858);
+}
+
 body {
-  background-color: #343434;
+  background-color: light-dark(white, #343434);
 }
 
 .flex-grid {
@@ -19,13 +24,13 @@ body {
   font-size: 30px !important;
 }
 
-.white-text {
-  color: #cfcfcf;
+.text-color {
+  color: light-dark(black, #cfcfcf);
 }
 
 
 #about-div {
-  background-color: #585858;
+  background-color: var(--div-background);
   width: 40%;
   height: stretch;
   border-radius: 8px;
@@ -64,6 +69,7 @@ body {
   border: 2px, solid, black;
   border-radius: 10px;
   font-size: 16px;
+  color: black;
 }
 
 #tag-label {
@@ -88,7 +94,7 @@ body {
 
 
 #thumbnails-div {
-  background-color: #585858;
+  background-color: var(--div-background);
   flex-wrap: wrap;
   border-radius: 8px;
 }
@@ -103,7 +109,7 @@ body {
   max-width: 95%;
   min-width: 95%;
   margin: 2%;
-  border: 2px white solid;
+  border: 2px light-dark(black, white) solid;
   border-radius: 8px;
 }
 
@@ -115,6 +121,7 @@ body {
   background-color: #414141cc;
   padding: 2px;
   border-radius: 4px;
+  color: #cfcfcf;
 }
 
 
@@ -126,6 +133,7 @@ body {
   border: 1px, solid, black;
   border-radius: 7px;
   font-size: 19px;
+  color: black;
 }
 
 #search-div {
