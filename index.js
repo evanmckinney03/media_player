@@ -84,7 +84,7 @@ function init() {
   });
 
   searchInput.addEventListener('keypress', function(event) {
-    if(event.key == 'Enter') { 
+    if(event.key == 'Enter' && this.value !== '') { 
       clearSearchButton.classList.remove('removed');
       addToSearchList(this.value);
       this.value = '';
@@ -93,9 +93,11 @@ function init() {
 
   const searchButton = document.getElementById('search-glass');
   searchButton.addEventListener('click', function(e) {
-    clearSearchButton.classList.remove('removed');
-    addToSearchList(searchInput.value);
-    searchInput.value = '';
+    if(searchInput.value !== '') {
+      clearSearchButton.classList.remove('removed');
+      addToSearchList(searchInput.value);
+      searchInput.value = '';
+    }
   });
 
   const updateThumbnailButton = document.getElementById('update-thumbnail-button');
