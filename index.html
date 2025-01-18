@@ -11,9 +11,9 @@
       <video controls id="video"></video>
       <div id="about-div">
         <div id="title-div" class="flex-grid">
-	  <textarea id="title" rows="1"></textarea>
+	  <textarea id="title" rows="1" class="white-text"></textarea>
 	  <div class="dropdown">
-            <span class="material-icons" id="dropdown-button">more_vert</span>
+            <span class="material-icons white-text" id="dropdown-button">more_vert</span>
 	    <div id="about-dropdown" class="dropdown-content removed">
 	      <p id="edit-title-button" title="Change the title of the video">Edit Title</p>
               <input type="button" id="update-thumbnail-button" title="Change the thumbnail of this video to the image at the time currently shown" value="Update Thumbnail">
@@ -22,9 +22,9 @@
 	  </div>
 	</div>
         <div id="tags-div" class="flex-column">
-	  <p id="tag-label">Tags:</p>
+	  <p id="tag-label" class="white-text">Tags:</p>
 	  <div id="tag-list" class="flex-grid">
-	    <span class="material-icons" id="edit-tag-button">add</span>
+	    <span class="material-icons white-text" id="edit-tag-button">add</span>
 	  </div>
         </div>
         <div id="tag-menu-div" class="removed flex-grid"> 
@@ -41,9 +41,9 @@
         <option value="tag">Tag</option>
       </select>
       <input type="text" id="search-input" autocomplete="off" placeholder="Search...">
-      <span class="material-icons" id="search-glass">search</span>
-      <p id="search-list"></p>
-      <span class="material-icons removed" id="clear-search-button">delete</span>
+      <span class="material-icons white-text large-icon" id="search-glass">search</span>
+      <div id="search-list" class="flex-grid"></div>
+      <span class="material-icons removed white-text large-icon" id="clear-search-button">delete</span>
       <datalist id="all-tags-datalist">
       </datalist>
     </div>
