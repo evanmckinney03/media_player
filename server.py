@@ -7,6 +7,8 @@ import sys
 class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
     #handle partial requests
     def do_GET(self):
+        if self.path == '/':
+            self.path = 'media_player.html'
         if "Range" in self.headers:
             # Parse the Range header
             range_header = self.headers["Range"]
