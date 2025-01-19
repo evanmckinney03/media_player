@@ -31,8 +31,9 @@ def execute(body, query):
         pass
 
     #get all the files currently in videos
-    files = os.listdir('videos')
     os.makedirs('json', exist_ok=True)
+    os.makedirs('videos', exist_ok=True)
+    files = os.listdir('videos')
 
     #remove from files ids that are in current_ids
     if(len(current_ids) > 0):
