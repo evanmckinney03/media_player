@@ -2,8 +2,10 @@ import http.server
 import os
 import json
 import importlib
+import sys
 
 class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
+    #handle partial requests
     def do_GET(self):
         if "Range" in self.headers:
             # Parse the Range header
@@ -81,12 +83,21 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
 
                 self.wfile.write(bytes(message, 'utf8'))
-        except ModuleNotFoundError:
+        except ModuleNotFoundError as e:
+            print(e)
             #send back an error
             self.send_response(404)
             self.send_header('Location', path)
             self.end_headers()
 if __name__ == '__main__':
-    server_address = ('', 8000)
-    httpd = http.server.HTTPServer(server_address, PartialContentHandler)
-    httpd.serve_forever()
+    port = 8000
+    try:
+        if(len(sys.argv) > 1):
+            port = int(sys.argv[1])
+        #check if port is valid
+        server_address = ('', port)
+        httpd = http.server.HTTPServer(server_address, PartialContentHandler)
+        print('Starting server on port ' + str(port))
+        httpd.serve_forever()
+    except (ValueError, OverflowError):
+        print('Passed in part must be valid (0-65535)')
