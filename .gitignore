@@ -3,5 +3,11 @@
 *.json
 *.jpg
 
+scripts/__pycache__
+my-venv/
+build/
+__pycache__/
+server.spec
+
 !demo/videos/*.mp4
 !demo/json/*.json
