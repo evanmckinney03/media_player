@@ -1,4 +1,7 @@
 # Media Player
-A media player for a personal homelab </br>
+A client and server size media player for personal use</br>
+
+## Features:
+An extension of the Python 
+
 There are no security considerations, so please do not use for anything other than a personal network </br>
-Must be run in the venv using source my-venv/bin/activate

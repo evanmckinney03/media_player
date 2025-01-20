@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Personal Media Player</title>
+  <link rel="stylesheet" href="media_player.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+  <div id="main-div">
+    <div id="video-div" class="flex-grid">
+      <video controls id="video"></video>
+      <div id="about-div">
+        <div id="title-div" class="flex-grid">
+	  <textarea id="title" rows="1" class="text-color"></textarea>
+	  <div class="dropdown">
+            <span class="material-icons text-color no-highlight" id="dropdown-button">more_vert</span>
+	    <div id="about-dropdown" class="dropdown-content removed">
+	      <p id="edit-title-button" title="Change the title of the video">Edit Title</p>
+              <input type="button" id="update-thumbnail-button" title="Change the thumbnail of this video to the image at the time currently shown" value="Update Thumbnail">
+              <p id="delete-video-button" title="Remove this video from the list of videos">Delete Video</p>
+	    </div>
+	  </div>
+	</div>
+        <div id="tags-div" class="flex-column">
+	  <p id="tag-label" class="text-color">Tags:</p>
+	  <div id="tag-list" class="flex-grid">
+	    <span class="material-icons text-color no-highlight" id="edit-tag-button">add</span>
+	  </div>
+        </div>
+        <div id="tag-menu-div" class="removed flex-grid"> 
+          <input type="text" list="tags-datalist" id="tag-input" autocomplete="off" placeholder="Enter a tag to add...">
+	  <span class="material-icons" id="add-tag-button">add</span>
+	  <datalist id="tags-datalist">
+          </datalist>
+        </div>
+	<span class="material-icons text-color no-highlight" id="light-mode-button">light_mode</span>
+      </div>
+    </div>
+    <div id="search-div" class="flex-grid">
+      <select id="search-by">
+        <option value="title">Title</option>
+        <option value="tag">Tag</option>
+      </select>
+      <input type="text" id="search-input" autocomplete="off" placeholder="Search...">
+      <span class="material-icons text-color large-icon no-highlight" id="search-glass">search</span>
+      <div id="search-list" class="flex-grid"></div>
+      <span class="material-icons removed text-color large-icon" id="clear-search-button">delete</span>
+      <datalist id="all-tags-datalist">
+      </datalist>
+    </div>
+    <div id="thumbnails-div" class="flex-grid">
+    </div>
+  </div>
+  <script src="media_player.js"></script>
+</body>
+</html>
