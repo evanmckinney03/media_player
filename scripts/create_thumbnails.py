@@ -45,6 +45,7 @@ def execute(body, query):
                 ids = [ids]
         except:
             #if there are no ids given, instead generate thumbnails for all ids that don't have one yet
+            os.makedirs('thumbnails', exist_ok=True)
             thumbnails = os.listdir('thumbnails')
             #remove the file extensions
             thumbnails = [t.split('.')[0].split('-')[0] for t in thumbnails]
