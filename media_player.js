@@ -147,21 +147,25 @@ async function displayFirstAndThumbnails(){
   ids_obj = json;
   await getTags();
   const ids = Object.keys(ids_obj);
-  displayVideo(ids[0]);
-  for(let i = 0; i < ids.length; i++) {
-    await createThumbnail(ids[i], ids_obj[ids[i]]['title']);
-  }
-  //after displaying the thumbnails, set elemsToSearch to all the thumbnails
-  elemsToSearch.push(...document.getElementById('thumbnails-div').children);
+  if(ids.length > 0) {
+    displayVideo(ids[0]);
+    for(let i = 0; i < ids.length; i++) {
+      await createThumbnail(ids[i], ids_obj[ids[i]]['title']);
+    }
+    //after displaying the thumbnails, set elemsToSearch to all the thumbnails
+    elemsToSearch.push(...document.getElementById('thumbnails-div').children);
 
-  //also populate the all-tags-datalist
-  const datalist = document.getElementById('all-tags-datalist');
-  const tags = Object.keys(tags_obj);
-  for(let i = 0; i < tags.length; i++) {
-    const option = document.createElement('option');
-    option.setAttribute('value', tags[i]);
-    option.setAttribute('id', 'all,' + tags[i]);
-    datalist.appendChild(option);
+    //also populate the all-tags-datalist
+    const datalist = document.getElementById('all-tags-datalist');
+    const tags = Object.keys(tags_obj);
+    for(let i = 0; i < tags.length; i++) {
+      const option = document.createElement('option');
+      option.setAttribute('value', tags[i]);
+      option.setAttribute('id', 'all,' + tags[i]);
+      datalist.appendChild(option);
+    }
+  } else {
+    alert('There are no videos on the server! Please put some into the videos folder and refresh this page.');
   }
 }
 
