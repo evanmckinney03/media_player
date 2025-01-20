@@ -8,6 +8,7 @@ my-venv/
 build/
 __pycache__/
 server.spec
+media_player_*/
 
 !demo/videos/*.mp4
 !demo/json/*.json
