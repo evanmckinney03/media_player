@@ -11,6 +11,7 @@ server.spec
 media_player_*/
 player/
 source_code/dist
+dist/
 
 !demo/videos/*.mp4
 !demo/json/*.json
