@@ -241,7 +241,9 @@ function displayVideo(id) {
     video.appendChild(src);
     addTagsToDatalist();
   } else {
-    addTagsToDatalist(ids_obj[id]['tags']);
+    //get old id
+    const old_id = src.getAttribute('src').slice('videos/'.length);
+    addTagsToDatalist(ids_obj[old_id]['tags']);
   }
   src.setAttribute('src', 'videos/' + id);
   const titleElem = document.getElementById('title');
