@@ -10,12 +10,12 @@ function init() {
   const editTitleButton = document.getElementById('edit-title-button');
   editTitleButton.addEventListener('click', function() {
     const titleElem = document.getElementById('title');
+    titleElem.removeAttribute('readonly');
     //set focus to titleElem
     titleElem.focus();
     document.getElementById('about-dropdown').classList.add('removed');
     removeClickListener();
-    titleElem.removeAttribute('readonly');
-    title.addEventListener('blur', editTitle, {once: true});
+    titleElem.addEventListener('blur', editTitle, {once: true});
   });
   const title = document.getElementById('title');
   title.addEventListener('keypress', function(event) {
