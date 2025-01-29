@@ -7,21 +7,23 @@ import json
 def resize(image):
     height = image.shape[0]
     width = image.shape[1]
+    print(height, width)
     if(height == 1080 and width == 1920):
         return image
     scale = 1080 / height if height > width else 1920 / width
     new_image = cv2.resize(image, None, fx= scale, fy=scale, interpolation = cv2.INTER_CUBIC)
     new_height = new_image.shape[0]
     new_width = new_image.shape[1]
+    print(new_height, new_width)
     if(new_height > new_width):
         #need to add black bars to left and right
-        left = math.ceil((1920 - new_width) / 2);
-        right = math.floor((1920 - new_width) / 2);
+        left = max(math.ceil((1920 - new_width) / 2), 0);
+        right = max(math.floor((1920 - new_width) / 2), 0);
         return cv2.copyMakeBorder(new_image, 0, 0, left, right, cv2.BORDER_CONSTANT, value = [0, 0, 0])
     else:
         #need to add black bars to top and bottom
-        top = math.ceil((1080 - new_height) / 2);
-        bottom = math.floor((1080 - new_height) / 2);
+        top = max(math.ceil((1080 - new_height) / 2), 0);
+        bottom = max(math.floor((1080 - new_height) / 2), 0);
         return cv2.copyMakeBorder(new_image, top, bottom, 0, 0, cv2.BORDER_CONSTANT, value = [0, 0, 0])
 
 def execute(body, query):
