@@ -42,7 +42,7 @@ def execute(body, query):
 
     #now files contains the list of videos that needs a unique id
     for f in files:
-        new_name = generate_id() + '.' + f.split('.')[-1]
+        new_name = generate_id() + '.' + lower(f.split('.')[-1])
         #add the file extenstion as well
         current_ids[new_name] = {'title': os.path.splitext(f)[0], 'tags': [], 'thumbnail-url': ''};
         #also rename the file in ../videos
