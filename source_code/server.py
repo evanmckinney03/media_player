@@ -4,6 +4,7 @@ import json
 import importlib
 import sys
 
+BYTE_LIMIT = 100000000 #100 MB
 class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
     #handle partial requests
     def do_GET(self):
@@ -27,6 +28,9 @@ class PartialContentHandler(http.server.SimpleHTTPRequestHandler):
             # Convert start and end to integers
             start = int(start) if start else 0
             end = int(end) if end else fs - 1
+            #ENforce byte limit
+            if(end - start > BYTE_LIMIT):
+                end = start + BYTE_LIMIT
 
             # Validate the range
             if start >= fs:
