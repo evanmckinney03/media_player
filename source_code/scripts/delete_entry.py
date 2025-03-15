@@ -34,9 +34,11 @@ def execute(body, query):
                     current_tags[tag]['ids'].remove(i)
                 #when removing an id, also need to move the associated video to deleted_vids folder
                 os.makedirs('deleted_vids', exist_ok=True);
-                os.rename('videos/' + i, 'deleted_vids/' + current_ids[i]['title'] + os.path.splitext(i)[1]);
+                if(os.path.exists('videos/' + i)):
+                    os.rename('videos/' + i, 'deleted_vids/' + current_ids[i]['title'] + os.path.splitext(i)[1]);
                 #also delete the thumbnail
-                os.remove(current_ids[i]['thumbnail-url']);
+                if(os.path.exists(current_ids[i]['thumbnail-url'])):
+                    os.remove(current_ids[i]['thumbnail-url']);
                 del current_ids[i]
             #write back to files
             id_file.seek(0)
