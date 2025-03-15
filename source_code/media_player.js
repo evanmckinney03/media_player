@@ -146,7 +146,10 @@ async function displayFirstAndThumbnails(){
   const json = await getData('create_thumbnails', 'POST');
   ids_obj = json;
   await getTags();
-  const ids = Object.keys(ids_obj);
+  const ids = Object.keys(ids_obj).sort(function(a, b) {
+    return ids_obj[a]['title'].localeCompare(ids_obj[b]['title'], undefined, {sensitivity: 'accent'});
+  });
+  console.log(ids)
   if(ids.length > 0) {
     displayVideo(ids[0]);
     for(let i = 0; i < ids.length; i++) {
@@ -192,12 +195,20 @@ async function createThumbnail(id, title) {
   const img = document.createElement('img');
   img.setAttribute('src', ids_obj[id]['thumbnail-url']);
   img.setAttribute('class', 'thumbnail-img');
+  const pdiv = document.getElementById('thumbnails-div');
   img.addEventListener('click', function() {
     //the parent is the div container whose id is the video name
     const id = this.parentNode.getAttribute('id');
     const currentId = getCurrentId();
     if(id != currentId) {
       displayVideo(id);
+      //also move the thumbnail to the beginning
+      pdiv.insertBefore(this.parentNode, pdiv.firstChild);
+      //and scroll back to top of page
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     }
   });
   const div = document.createElement('div');
@@ -205,7 +216,6 @@ async function createThumbnail(id, title) {
   div.appendChild(img);
   div.setAttribute('id', id);
   div.setAttribute('class', 'thumbnail');
-  const pdiv = document.getElementById('thumbnails-div');
   pdiv.appendChild(div);
 }
 
