@@ -22,6 +22,8 @@ def execute(body, query):
 
     current_ids = {}
     #try to open json/ids.json
+    os.makedirs('json', exist_ok=True)
+    
     try:
         with open(location, 'r+') as file:
             #set current_ids to be the stuff in ids.json
@@ -30,8 +32,12 @@ def execute(body, query):
         #if the file does not exist, then current_ids should be empty
         pass
 
+    #open tags.json
+    tags_file = open('json/tags.json', 'a+')
+    tags_file.seek(0)
+    tags = json.load(tags_file)
+
     #get all the files currently in videos
-    os.makedirs('json', exist_ok=True)
     os.makedirs('videos', exist_ok=True)
     files = os.listdir('videos')
 
@@ -42,17 +48,26 @@ def execute(body, query):
 
     #now files contains the list of videos that needs a unique id
     for f in files:
-        new_name = generate_id() + '.' + lower(f.split('.')[-1])
         #add the file extenstion as well
-        current_ids[new_name] = {'title': os.path.splitext(f)[0], 'tags': [], 'thumbnail-url': ''};
+        new_name = generate_id() + '.' + f.split('.')[-1].lower()
+        current_ids[new_name] = {'title': os.path.splitext(f)[0], 'tags': ['!new'], 'thumbnail-url': ''};
         #also rename the file in ../videos
         os.rename('videos/' + f, 'videos/' + new_name)
+        #add !new tag
+        try:
+          tags['!new']['ids'].append(new_name)
+        except:
+          tags['!new'] = {'ids': [new_name]}
 
     #now current_ids contains all the unique id to old file names
     with open(location, 'w+') as file:
         file.seek(0)
         json.dump(current_ids, file)
     
+    tags_file.close()
+    with open('json/tags.json', 'w+') as file:
+        file.seek(0)
+        json.dump(tags, file)
     success = True
     message = 'hello'
     return success, location, message
