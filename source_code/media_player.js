@@ -143,9 +143,8 @@ function init() {
   //add event listener for when user scrolls to bottom of thumbnails to load more
   const thumbDiv = document.getElementById('thumbnails-div');
   thumbDiv.addEventListener('scroll', function() {
-    console.log('scroll')
-    if(this.offsetHeight + this.scrollTop >= this.scrollHeight) {
-      console.log('scrolled to bottom of thumbnails');
+    if(this.offsetHeight + this.scrollTop >= this.scrollHeight - 50) {
+      loadMoreThumbnails();
     }
   });
 }
@@ -163,10 +162,10 @@ async function displayFirstAndThumbnails(){
   if(ids.length > 0) {
     displayVideo(ids[0]);
     for(let i = 0; i < ids.length && i < THUMBNAILS_TO_LOAD; i++) {
-      await createThumbnail(ids[i], ids_obj[ids[i]]['title']);
+      await createThumbnail(ids[i]);
     }
     //after displaying the thumbnails, set elemsToSearch to all the thumbnails
-    elemsToSearch.push(...document.getElementById('thumbnails-div').children);
+    elemsToSearch.push(...ids);
 
     //also populate the all-tags-datalist
     const datalist = document.getElementById('all-tags-datalist');
@@ -198,7 +197,8 @@ async function editTitle() {
   }
 }
 
-async function createThumbnail(id, title) {
+async function createThumbnail(id) {
+  const title = ids_obj[id]['title'];
   const text = document.createElement('p');
   text.innerHTML = title;
   text.setAttribute('class', 'thumbnail-text');
@@ -229,6 +229,16 @@ async function createThumbnail(id, title) {
   div.setAttribute('id', id);
   div.setAttribute('class', 'thumbnail');
   pdiv.appendChild(div);
+}
+
+async function loadMoreThumbnails() {
+  //get the last thumbnail
+  const thumbDiv = document.getElementById('thumbnails-div');
+  const id = thumbDiv.lastElementChild.getAttribute('id');
+  const index = (elemsToSearch.findIndex((element) => element === id)) + 1;
+  for(let i = 0; i < THUMBNAILS_TO_LOAD && index + i < elemsToSearch.length - 1; i++) {
+    await createThumbnail(elemsToSearch[index + i]); 
+  }
 }
 
 //any error thrown will be propagated up
@@ -441,11 +451,11 @@ async function sendTags() {
 function searchTitles(value) {
   //for now, just linear search through the titles
   for(let i = 0; i < elemsToSearch.length; i++) {
-    const title = ids_obj[elemsToSearch[i].getAttribute('id')]['title'];
+    const title = ids_obj[elemsToSearch[i]]['title'];
     if(title.toLowerCase().includes(value.toLowerCase())) {
-      elemsToSearch[i].classList.remove('removed');
+      document.getElementById(elemsToSearch[i]).classList.remove('removed');
     } else {
-      elemsToSearch[i].classList.add('removed');
+      document.getElementById(elemsToSearch[i]).classList.add('removed');
     }
   }
 }
@@ -457,10 +467,10 @@ function searchTags(value) {
   if(tag !== undefined) {
     const tagSet = new Set(tag['ids']);
     for(let i = 0; i < elemsToSearch.length; i++) {
-      if(tagSet.has(elemsToSearch[i].getAttribute('id'))) {
-        elemsToSearch[i].classList.remove('removed');
+      if(tagSet.has(elemsToSearch[i])) {
+        document.getElementById(elemsToSearch[i]).classList.remove('removed');
       } else {
-        elemsToSearch[i].classList.add('removed');
+        document.getElementById(elemsToSearch[i]).classList.add('removed');
       }
     }
   } else {
@@ -478,7 +488,7 @@ function addToSearchList(value) {
   item.innerHTML = value;
   searchList.appendChild(item);
   for(let i = elemsToSearch.length - 1; i >= 0; i--) {
-    if(elemsToSearch[i].classList.contains('removed')) {
+    if(document.getElementById(elemsToSearch[i]).classList.contains('removed')) {
       elemsToSearch.splice(i, 1);
     }
   }
