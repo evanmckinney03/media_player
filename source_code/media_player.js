@@ -3,6 +3,8 @@ let ids_obj;
 let tags_obj;
 const elemsToSearch = [];
 
+const THUMBNAILS_TO_LOAD = 21;
+
 window.onload = init()
 function init() {
   displayFirstAndThumbnails();
@@ -137,6 +139,15 @@ function init() {
       document.documentElement.style.setProperty('color-scheme', 'light');
     }
   });
+
+  //add event listener for when user scrolls to bottom of thumbnails to load more
+  const thumbDiv = document.getElementById('thumbnails-div');
+  thumbDiv.addEventListener('scroll', function() {
+    console.log('scroll')
+    if(this.offsetHeight + this.scrollTop >= this.scrollHeight) {
+      console.log('scrolled to bottom of thumbnails');
+    }
+  });
 }
 
 async function displayFirstAndThumbnails(){
@@ -149,10 +160,9 @@ async function displayFirstAndThumbnails(){
   const ids = Object.keys(ids_obj).sort(function(a, b) {
     return ids_obj[a]['title'].localeCompare(ids_obj[b]['title'], undefined, {sensitivity: 'accent'});
   });
-  console.log(ids)
   if(ids.length > 0) {
     displayVideo(ids[0]);
-    for(let i = 0; i < ids.length; i++) {
+    for(let i = 0; i < ids.length && i < THUMBNAILS_TO_LOAD; i++) {
       await createThumbnail(ids[i], ids_obj[ids[i]]['title']);
     }
     //after displaying the thumbnails, set elemsToSearch to all the thumbnails
@@ -202,6 +212,7 @@ async function createThumbnail(id, title) {
     const currentId = getCurrentId();
     if(id != currentId) {
       displayVideo(id);
+      /*
       //also move the thumbnail to the beginning
       pdiv.insertBefore(this.parentNode, pdiv.firstChild);
       //and scroll back to top of page
@@ -209,6 +220,7 @@ async function createThumbnail(id, title) {
         top: 0,
         behavior: 'smooth'
       });
+      */
     }
   });
   const div = document.createElement('div');

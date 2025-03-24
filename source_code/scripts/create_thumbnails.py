@@ -7,14 +7,12 @@ import json
 def resize(image):
     height = image.shape[0]
     width = image.shape[1]
-    print(height, width)
     if(height == 1080 and width == 1920):
         return image
     scale = 1080 / height if height > width else 1920 / width
     new_image = cv2.resize(image, None, fx= scale, fy=scale, interpolation = cv2.INTER_CUBIC)
     new_height = new_image.shape[0]
     new_width = new_image.shape[1]
-    print(new_height, new_width)
     if(new_height > new_width):
         #need to add black bars to left and right
         left = max(math.ceil((1920 - new_width) / 2), 0);
