@@ -141,10 +141,43 @@ function init() {
   });
 
   //add event listener for when user scrolls to bottom of thumbnails to load more
+  //assumes there are three videos per row still
   const thumbDiv = document.getElementById('thumbnails-div');
+  let row = 0;
   thumbDiv.addEventListener('scroll', function() {
     if(this.offsetHeight + this.scrollTop >= this.scrollHeight - 50) {
+      console.log('scrolled to bottom');
       loadMoreThumbnails();
+    }
+    const newRow = Math.floor((this.offsetHeight + this.scrollTop) / this.firstElementChild.offsetHeight);
+    if(row != newRow) {
+      row = newRow;
+      //when scrolling to a new row, check that the elements that should be there are visible
+      console.log(newRow);
+      //get last element in the row that is currently being displayed
+      const lastEl = this.children[newRow * 3 - 1];
+      let thumbnail = lastEl;
+      //find it in elemsToSearch
+      const index = elemsToSearch.findIndex((element) => element[0] === lastEl.getAttribute('id')) + 1;
+      //make sure the next three thumbnails that should be shown are correct
+      for(let i = 0, added = 0; added < 3; i++) {
+        const el = elemsToSearch[index + i];
+        if(el[1]) {
+          thumbnail = thumbnail.nextElementSibling;
+          console.log(thumbnail)
+          console.log(el)
+          if(thumbnail.getAttribute('id') === el[0]) {
+            //make sure it is visible
+            thumbnail.classList.remove('removed');
+          } else {
+            //it needs to be created
+            const newEl = createThumbnail(el[0]); 
+            //move to correct position
+            this.insertBefore(newEl, thumbnail.nextElementSibling)
+          }
+          added++;
+        }
+      }
     }
   });
 }
@@ -165,7 +198,9 @@ async function displayFirstAndThumbnails(){
       await createThumbnail(ids[i]);
     }
     //after displaying the thumbnails, set elemsToSearch to all the thumbnails
-    elemsToSearch.push(...ids);
+    for(let i = 0; i < ids.length; i++) {
+      elemsToSearch.push([ids[i], true]);
+    }
 
     //also populate the all-tags-datalist
     const datalist = document.getElementById('all-tags-datalist');
@@ -229,15 +264,30 @@ async function createThumbnail(id) {
   div.setAttribute('id', id);
   div.setAttribute('class', 'thumbnail');
   pdiv.appendChild(div);
+  return div;
 }
 
 async function loadMoreThumbnails() {
   //get the last thumbnail
   const thumbDiv = document.getElementById('thumbnails-div');
-  const id = thumbDiv.lastElementChild.getAttribute('id');
-  const index = (elemsToSearch.findIndex((element) => element === id)) + 1;
-  for(let i = 0; i < THUMBNAILS_TO_LOAD && index + i < elemsToSearch.length - 1; i++) {
-    await createThumbnail(elemsToSearch[index + i]); 
+  let thumbnail = thumbDiv.lastElementChild;
+  for(let i = 0; i < thumbDiv.children.length && thumbnail.classList.contains('removed'); i++) {
+    thumbnail = thumbnail.previousElementSibling;
+  }
+  const id = thumbnail.getAttribute('id');
+  const index = (elemsToSearch.findIndex((element) => element[0] === id)) + 1;
+  for(let i = 0, added = 0; added < THUMBNAILS_TO_LOAD && index + i < elemsToSearch.length - 1; i++) {
+    //only show thumbnail if it appears in the search
+    if(elemsToSearch[index + i][1]) {
+      //if it exists, then just make it appear, otherwise thumbnail must be created
+      const elem = document.getElementById(elemsToSearch[index + i][1]);
+      if(elem === null) {
+        await createThumbnail(elemsToSearch[index + i][0]); 
+      } else {
+        elem.classList.remove('removed');
+      }
+      added++;
+    }
   }
 }
 
@@ -451,11 +501,18 @@ async function sendTags() {
 function searchTitles(value) {
   //for now, just linear search through the titles
   for(let i = 0; i < elemsToSearch.length; i++) {
-    const title = ids_obj[elemsToSearch[i]]['title'];
+    const title = ids_obj[elemsToSearch[i][0]]['title'];
+    const elem = document.getElementById(elemsToSearch[i][0])
     if(title.toLowerCase().includes(value.toLowerCase())) {
-      document.getElementById(elemsToSearch[i]).classList.remove('removed');
+      if(elem !== null) {
+        elem.classList.remove('removed');
+      }
+      elemsToSearch[i][1] = true;
     } else {
-      document.getElementById(elemsToSearch[i]).classList.add('removed');
+      if(elem !== null) {
+        elem.classList.add('removed');
+      }
+      elemsToSearch[i][1] = false;
     }
   }
 }
@@ -468,9 +525,11 @@ function searchTags(value) {
     const tagSet = new Set(tag['ids']);
     for(let i = 0; i < elemsToSearch.length; i++) {
       if(tagSet.has(elemsToSearch[i])) {
-        document.getElementById(elemsToSearch[i]).classList.remove('removed');
+        document.getElementById(elemsToSearch[i][0]).classList.remove('removed');
+        elemsToSearch[i][1] = true;
       } else {
-        document.getElementById(elemsToSearch[i]).classList.add('removed');
+        document.getElementById(elemsToSearch[i][0]).classList.add('removed');
+        elemsToSearch[i][1] = false;
       }
     }
   } else {
