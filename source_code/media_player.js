@@ -3,7 +3,7 @@ let ids_obj;
 let tags_obj;
 const elemsToSearch = [];
 
-const THUMBNAILS_TO_LOAD = 21;
+const THUMBNAILS_PER_ROW = 3;
 
 window.onload = init()
 function init() {
@@ -141,43 +141,22 @@ function init() {
   });
 
   //add event listener for when user scrolls to bottom of thumbnails to load more
-  //assumes there are three videos per row still
+  let firstRow = 0, lastRow = 0;
   const thumbDiv = document.getElementById('thumbnails-div');
-  let row = 0;
   thumbDiv.addEventListener('scroll', function() {
-    if(this.offsetHeight + this.scrollTop >= this.scrollHeight - 50) {
-      console.log('scrolled to bottom');
-      loadMoreThumbnails();
+    //find the first visible element in the first row
+    let thumbnail = this.firstElementChild;
+    while(thumbnail !== null && thumbnail.classList.contains('removed')) {
+      thumbnail = thumbnail.nextElementSibling;
     }
-    const newRow = Math.floor((this.offsetHeight + this.scrollTop) / this.firstElementChild.offsetHeight);
-    if(row != newRow) {
-      row = newRow;
-      //when scrolling to a new row, check that the elements that should be there are visible
-      console.log(newRow);
-      //get last element in the row that is currently being displayed
-      const lastEl = this.children[newRow * 3 - 1];
-      let thumbnail = lastEl;
-      //find it in elemsToSearch
-      const index = elemsToSearch.findIndex((element) => element[0] === lastEl.getAttribute('id')) + 1;
-      //make sure the next three thumbnails that should be shown are correct
-      for(let i = 0, added = 0; added < 3; i++) {
-        const el = elemsToSearch[index + i];
-        if(el[1]) {
-          thumbnail = thumbnail.nextElementSibling;
-          console.log(thumbnail)
-          console.log(el)
-          if(thumbnail.getAttribute('id') === el[0]) {
-            //make sure it is visible
-            thumbnail.classList.remove('removed');
-          } else {
-            //it needs to be created
-            const newEl = createThumbnail(el[0]); 
-            //move to correct position
-            this.insertBefore(newEl, thumbnail.nextElementSibling)
-          }
-          added++;
-        }
-      }
+    //the first row that is displayed zero indexed
+    const newFirstRow = Math.floor(this.scrollTop / thumbnail.offsetHeight);
+    //the last row that is displayed
+    const newLastRow = Math.floor((this.scrollTop + this.offsetHeight) / thumbnail.offsetHeight);
+    if(newLastRow != lastRow) {
+      firstRow = newFirstRow;
+      lastRow = newLastRow;
+      restoreThumbnails();
     }
   });
 }
@@ -194,13 +173,14 @@ async function displayFirstAndThumbnails(){
   });
   if(ids.length > 0) {
     displayVideo(ids[0]);
-    for(let i = 0; i < ids.length && i < THUMBNAILS_TO_LOAD; i++) {
-      await createThumbnail(ids[i]);
-    }
-    //after displaying the thumbnails, set elemsToSearch to all the thumbnails
     for(let i = 0; i < ids.length; i++) {
-      elemsToSearch.push([ids[i], true]);
+      await createThumbnail(ids[i], ids_obj[ids[i]]['title']);
     }
+    //restore the thumbnails so they show the correct image
+    restoreThumbnails();
+    
+    //after displaying the thumbnails, set elemsToSearch to all the thumbnails
+    elemsToSearch.push(...document.getElementById('thumbnails-div').children);
 
     //also populate the all-tags-datalist
     const datalist = document.getElementById('all-tags-datalist');
@@ -232,13 +212,14 @@ async function editTitle() {
   }
 }
 
-async function createThumbnail(id) {
-  const title = ids_obj[id]['title'];
+async function createThumbnail(id, title) {
   const text = document.createElement('p');
   text.innerHTML = title;
   text.setAttribute('class', 'thumbnail-text');
   const img = document.createElement('img');
-  img.setAttribute('src', ids_obj[id]['thumbnail-url']);
+  //to save processing time, make all images have the same thumbnail
+  const thumbnailId = Object.values(ids_obj)[0]['thumbnail-url'];
+  img.setAttribute('src', thumbnailId);
   img.setAttribute('class', 'thumbnail-img');
   const pdiv = document.getElementById('thumbnails-div');
   img.addEventListener('click', function() {
@@ -247,15 +228,6 @@ async function createThumbnail(id) {
     const currentId = getCurrentId();
     if(id != currentId) {
       displayVideo(id);
-      /*
-      //also move the thumbnail to the beginning
-      pdiv.insertBefore(this.parentNode, pdiv.firstChild);
-      //and scroll back to top of page
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-      */
     }
   });
   const div = document.createElement('div');
@@ -264,31 +236,52 @@ async function createThumbnail(id) {
   div.setAttribute('id', id);
   div.setAttribute('class', 'thumbnail');
   pdiv.appendChild(div);
-  return div;
 }
 
-async function loadMoreThumbnails() {
-  //get the last thumbnail
+//finds the thumbnails visible in the thumbnail-div and updates them to the correct image
+async function restoreThumbnails() {
   const thumbDiv = document.getElementById('thumbnails-div');
-  let thumbnail = thumbDiv.lastElementChild;
-  for(let i = 0; i < thumbDiv.children.length && thumbnail.classList.contains('removed'); i++) {
-    thumbnail = thumbnail.previousElementSibling;
+  //make sure there are thumbnails to update
+  if(thumbDiv.children.length == 0) return;
+
+  //find the first visible element in the first row
+  let thumbnail = thumbDiv.firstElementChild;
+  while(thumbnail !== null && thumbnail.classList.contains('removed')) {
+    thumbnail = thumbnail.nextElementSibling;
   }
-  const id = thumbnail.getAttribute('id');
-  const index = (elemsToSearch.findIndex((element) => element[0] === id)) + 1;
-  for(let i = 0, added = 0; added < THUMBNAILS_TO_LOAD && index + i < elemsToSearch.length - 1; i++) {
-    //only show thumbnail if it appears in the search
-    if(elemsToSearch[index + i][1]) {
-      //if it exists, then just make it appear, otherwise thumbnail must be created
-      const elem = document.getElementById(elemsToSearch[index + i][1]);
-      if(elem === null) {
-        await createThumbnail(elemsToSearch[index + i][0]); 
-      } else {
-        elem.classList.remove('removed');
-      }
-      added++;
+  if(thumbnail === null) return;
+  
+  //waits for the thumbnail image to load so its height can be correctly determined
+  //assumes the thumbnail image is last in the thumbnail div
+  await thumbnail.lastElementChild.decode();
+  //the first row that is displayed zero indexed
+  const firstRow = Math.floor(thumbDiv.scrollTop / thumbnail.offsetHeight);
+  //the last row that is displayed
+  const lastRow = Math.floor((thumbDiv.scrollTop + thumbDiv.offsetHeight) / thumbnail.offsetHeight);
+
+  //get first thumbnail in the first row
+  let count = 0;
+  while(count < firstRow * THUMBNAILS_PER_ROW) {
+    thumbnail = thumbnail.nextElementSibling;
+    if(!thumbnail.classList.contains('removed')) {
+      count++
     }
   }
+
+  //number of thumbnails to restore is (lastRow - firstRow + 1) * THUMBNAILS_PER_ROW 
+  //can sometimes be less if at the end of the thumbnails, so just stop if thumbnail becomes null
+  count = 0;
+  while(count < (lastRow - firstRow + 1) * THUMBNAILS_PER_ROW && thumbnail !== null){
+    console.log(thumbnail);
+    console.log(count);
+    if(!thumbnail.classList.contains('removed')) {
+      //set thumbnail img link to the correct one
+      thumbnail.lastElementChild.setAttribute('src', ids_obj[thumbnail.getAttribute('id')]['thumbnail-url'])
+      count++;
+    }
+    thumbnail = thumbnail.nextElementSibling;
+  }
+
 }
 
 //any error thrown will be propagated up
@@ -501,20 +494,14 @@ async function sendTags() {
 function searchTitles(value) {
   //for now, just linear search through the titles
   for(let i = 0; i < elemsToSearch.length; i++) {
-    const title = ids_obj[elemsToSearch[i][0]]['title'];
-    const elem = document.getElementById(elemsToSearch[i][0])
+    const title = ids_obj[elemsToSearch[i].getAttribute('id')]['title'];
     if(title.toLowerCase().includes(value.toLowerCase())) {
-      if(elem !== null) {
-        elem.classList.remove('removed');
-      }
-      elemsToSearch[i][1] = true;
+      elemsToSearch[i].classList.remove('removed');
     } else {
-      if(elem !== null) {
-        elem.classList.add('removed');
-      }
-      elemsToSearch[i][1] = false;
+      elemsToSearch[i].classList.add('removed');
     }
   }
+  restoreThumbnails()
 }
 
 //search by tags and display the thumbnails
@@ -524,17 +511,16 @@ function searchTags(value) {
   if(tag !== undefined) {
     const tagSet = new Set(tag['ids']);
     for(let i = 0; i < elemsToSearch.length; i++) {
-      if(tagSet.has(elemsToSearch[i])) {
-        document.getElementById(elemsToSearch[i][0]).classList.remove('removed');
-        elemsToSearch[i][1] = true;
+      if(tagSet.has(elemsToSearch[i].getAttribute('id'))) {
+        elemsToSearch[i].classList.remove('removed');
       } else {
-        document.getElementById(elemsToSearch[i][0]).classList.add('removed');
-        elemsToSearch[i][1] = false;
+        elemsToSearch[i].classList.add('removed');
       }
     }
   } else {
     searchTitles('');
   }
+  restoreThumbnails()
 }
 
 //adds the given value to the search list
@@ -547,7 +533,7 @@ function addToSearchList(value) {
   item.innerHTML = value;
   searchList.appendChild(item);
   for(let i = elemsToSearch.length - 1; i >= 0; i--) {
-    if(document.getElementById(elemsToSearch[i]).classList.contains('removed')) {
+    if(elemsToSearch[i].classList.contains('removed')) {
       elemsToSearch.splice(i, 1);
     }
   }
@@ -562,6 +548,7 @@ function clearSearch() {
     searchList.removeChild(searchList.lastChild);
   }
   searchTitles('');
+  restoreThumbnails()
 }
 
 //gets the current position of the video and updates the thumbnail to be that frame
