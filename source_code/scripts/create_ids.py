@@ -33,9 +33,13 @@ def execute(body, query):
         pass
 
     #open tags.json
-    tags_file = open('json/tags.json', 'a+')
-    tags_file.seek(0)
-    tags = json.load(tags_file)
+    tags = {};
+    try :
+        tags_file = open('json/tags.json', 'r+')
+        tags = json.load(tags_file)
+    except:
+        #if there is an error decoding, then tags should just be empty
+        pass
 
     #get all the files currently in videos
     os.makedirs('videos', exist_ok=True)
