@@ -176,6 +176,7 @@ async function displayFirstAndThumbnails(){
     for(let i = 0; i < ids.length; i++) {
       await createThumbnail(ids[i], ids_obj[ids[i]]['title']);
     }
+
     //restore the thumbnails so they show the correct image
     restoreThumbnails();
     
@@ -217,9 +218,6 @@ async function createThumbnail(id, title) {
   text.innerHTML = title;
   text.setAttribute('class', 'thumbnail-text');
   const img = document.createElement('img');
-  //to save processing time, make all images have the same thumbnail
-  const thumbnailId = Object.values(ids_obj)[0]['thumbnail-url'];
-  img.setAttribute('src', thumbnailId);
   img.setAttribute('class', 'thumbnail-img');
   const pdiv = document.getElementById('thumbnails-div');
   img.addEventListener('click', function() {
@@ -250,14 +248,13 @@ async function restoreThumbnails() {
     thumbnail = thumbnail.nextElementSibling;
   }
   if(thumbnail === null) return;
-  
-  //waits for the thumbnail image to load so its height can be correctly determined
+
   //assumes the thumbnail image is last in the thumbnail div
-  await thumbnail.lastElementChild.decode();
+  const thumbnailHeight = thumbnail.lastElementChild.offsetWidth * (9/16);
   //the first row that is displayed zero indexed
-  const firstRow = Math.floor(thumbDiv.scrollTop / thumbnail.offsetHeight);
+  const firstRow = Math.floor(thumbDiv.scrollTop / thumbnailHeight);
   //the last row that is displayed
-  const lastRow = Math.floor((thumbDiv.scrollTop + thumbDiv.offsetHeight) / thumbnail.offsetHeight);
+  const lastRow = Math.floor((thumbDiv.scrollTop + thumbDiv.offsetHeight) / thumbnailHeight);
 
   //get first thumbnail in the first row
   let count = 0;
@@ -268,15 +265,14 @@ async function restoreThumbnails() {
     }
   }
 
-  //number of thumbnails to restore is (lastRow - firstRow + 1) * THUMBNAILS_PER_ROW 
+  //number of thumbnails to restore is (lastRow - firstRow + 2) * THUMBNAILS_PER_ROW 
+  //restore an extra row so user doesnt see flickering unless scrolling very fast
   //can sometimes be less if at the end of the thumbnails, so just stop if thumbnail becomes null
   count = 0;
-  while(count < (lastRow - firstRow + 1) * THUMBNAILS_PER_ROW && thumbnail !== null){
-    console.log(thumbnail);
-    console.log(count);
+  while(count < (lastRow - firstRow + 2) * THUMBNAILS_PER_ROW && thumbnail !== null){
     if(!thumbnail.classList.contains('removed')) {
       //set thumbnail img link to the correct one
-      thumbnail.lastElementChild.setAttribute('src', ids_obj[thumbnail.getAttribute('id')]['thumbnail-url'])
+      thumbnail.lastElementChild.setAttribute('src', ids_obj[thumbnail.getAttribute('id')]['thumbnail-url']);
       count++;
     }
     thumbnail = thumbnail.nextElementSibling;
