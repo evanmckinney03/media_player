@@ -174,7 +174,7 @@ async function displayFirstAndThumbnails(){
   if(ids.length > 0) {
     displayVideo(ids[0]);
     for(let i = 0; i < ids.length; i++) {
-      await createThumbnail(ids[i], ids_obj[ids[i]]['title']);
+      createThumbnail(ids[i], ids_obj[ids[i]]['title']);
     }
 
     //restore the thumbnails so they show the correct image
