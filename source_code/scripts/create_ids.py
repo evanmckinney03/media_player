@@ -68,7 +68,6 @@ def execute(body, query):
         file.seek(0)
         json.dump(current_ids, file)
     
-    tags_file.close()
     with open('json/tags.json', 'w+') as file:
         file.seek(0)
         json.dump(tags, file)
